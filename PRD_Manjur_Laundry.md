@@ -69,6 +69,12 @@ Fitur cetak struk mutakhir yang mendukng tiga ukuran kertas cetak standar:
 - **Role Kasir**: Akses ke POS Transaksi, Pelanggan, dan monitoring Inventaris (tanpa izin edit harga/item).
 - **Role Produksi**: Hanya dapat melihat dan memperbarui status progres pengerjaan cucian (`Antrean` -> `Dicuci` -> `Disetrika` -> `Selesai`).
 
+### H. Profile Perusahaan & Outlet (Pengaturan Identitas Usaha & Struk)
+- **Menu Profile di Dalam Akun**: Tersedia menu **Profile Perusahaan** di dalam menu dropdown **Akun** dan Pusat Akun (Akun Hub).
+- **Pengaturan Lengkap**: Pengguna dapat mengedit **Nama Perusahaan/Usaha**, **Alamat Lengkap Outlet**, **Nomor Kontak / WhatsApp**, dan **Slogan/Tagline**.
+- **Live Preview Real-Time**: Dilengkapi pratinjau langsung nota cetak thermal & blueprint yang memperlihatkan bagaimana identitas perusahaan baru terlihat pada kop struk.
+- **Penerapan Global & Otomatis**: Perubahan profil disimpan secara persisten di `localStorage` (`appState.companyProfile`) dan langsung diterapkan pada Header Aplikasi, Layar Login, serta seluruh hasil cetakan Nota Struk.
+
 ---
 
 ## 4. Skema Database Google Sheets (Opsional)
@@ -87,6 +93,14 @@ Jika Anda ingin menghubungkan aplikasi ke Google Sheets, buat 6 sheet/tab beriku
 
 ## 5. Panduan Penggunaan Singkat
 1. **Buka Aplikasi**: Klik ganda file `index.html` untuk membuka aplikasi di browser komputer, tablet, atau smartphone Anda.
-2. **Uji Coba Hak Akses**: Gunakan drop-down **"Simulasikan Role"** di pojok kanan atas untuk melihat tampilan sebagai Owner, Kasir, atau staf Produksi.
-3. **Membuat Transaksi Baru**: Buka tab **POS Kasir**, pilih pelanggan dan layanan, masukkan berat/jumlah item, klik **"Simpan & Cetak Nota"**.
-4. **Mencetak Struk**: Pada jendela yang muncul, pilih tombol ukuran struk (`58mm`, `80mm`, atau `A4`), lalu klik **"Cetak Nota Sekarang"**.
+2. **Instal Aplikasi di HP / Android**: Klik tombol **"📱 Pasang di HP"** di header navigasi atau di layar login, atau ketuk menu **Titik Tiga (⋮)** di Google Chrome Android lalu pilih **"Tambahkan ke Layar Utama" (Add to Home Screen)**. Aplikasi akan terpasang dengan logo resmi **Manjur Laundry** dan bisa dibuka secara *full screen*.
+3. **Uji Coba Hak Akses**: Gunakan drop-down **"Simulasikan Role"** di pojok kanan atas untuk melihat tampilan sebagai Owner, Kasir, atau staf Produksi.
+4. **Membuat Transaksi Baru**: Buka tab **POS Kasir**, pilih pelanggan dan layanan, masukkan berat/jumlah item, klik **"Simpan & Cetak Nota"**.
+5. **Mencetak Struk**: Pada jendela yang muncul, pilih tombol ukuran struk (`58mm`, `80mm`, atau `A4`), lalu klik **"Cetak Nota Sekarang"**.
+
+---
+
+## 6. Spesifikasi PWA (Progressive Web App) & Mobile Android
+- **Manifest (`manifest.json`)**: Mengatur nama aplikasi (`Manjur Laundry`), warna tema (`#0284c7`), dan ikon resmi (`logo_manjur.png`).
+- **Service Worker (`sw.js`)**: Memungkinkan aplikasi berjalan secara offline dan disimpan ke dalam cache memori HP Android maupun desktop.
+- **Dukungan APK Mandiri**: Dapat dikonversi menjadi file `.apk` Android menggunakan generator PWA seperti PWABuilder.
