@@ -1615,26 +1615,26 @@
             <div class="bg-slate-100 px-6 py-3 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2 no-print text-xs">
                 <span class="font-bold text-slate-700">Pilih Ukuran Kertas:</span>
                 <div class="flex gap-1.5">
-                    <button onclick="setPrintSize('58mm')" id="btn-size-58" class="size-btn bg-white border border-slate-300 text-slate-700 hover:border-primary font-bold px-3 py-1.5 rounded-lg">58mm Thermal</button>
-                    <button onclick="setPrintSize('80mm')" id="btn-size-80" class="size-btn bg-primary text-white font-bold px-3 py-1.5 rounded-lg">80mm Thermal</button>
+                    <button onclick="setPrintSize('58mm')" id="btn-size-58" class="size-btn bg-primary text-white font-bold px-3 py-1.5 rounded-lg">58mm Thermal</button>
+                    <button onclick="setPrintSize('80mm')" id="btn-size-80" class="size-btn bg-white border border-slate-300 text-slate-700 hover:border-primary font-bold px-3 py-1.5 rounded-lg">80mm Thermal</button>
                     <button onclick="setPrintSize('a4')" id="btn-size-a4" class="size-btn bg-white border border-slate-300 text-slate-700 hover:border-primary font-bold px-3 py-1.5 rounded-lg">A4 Invoice</button>
                 </div>
             </div>
 
             <div class="p-6 overflow-y-auto flex-grow bg-slate-200 flex justify-center">
-                <div id="receipt-print-area" class="thermal-receipt print-80mm bg-white p-6 shadow-md text-slate-900">
+                <div id="receipt-print-area" class="thermal-receipt print-58mm bg-white p-6 shadow-md text-slate-900">
                     <div class="text-center border-b-2 border-dashed border-slate-800 pb-3.5 mb-3">
                         <!-- Kop Nota Brand Header dengan Logo -->
                         <div class="flex flex-col items-center justify-center mb-2">
                             <img id="print-logo-img" src="logo_manjur.png" alt="Logo Manjur Laundry" class="h-16 w-auto object-contain mb-1.5 contrast-125" crossorigin="anonymous">
-                            <h2 class="text-base sm:text-lg font-extrabold tracking-tight uppercase leading-none">
-                                <span class="text-navy font-black">MANJUR</span> <span class="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent font-black">LAUNDRY</span>
+                            <h2 id="print-company-name" class="text-base sm:text-lg font-extrabold tracking-tight uppercase leading-none text-navy font-black">
+                                MANJUR LAUNDRY
                             </h2>
-                            <p class="text-[10px] sm:text-xs font-bold text-accent-dark tracking-wide flex items-center justify-center gap-1 mt-1 leading-none">
+                            <p id="print-company-tagline" class="text-[10px] sm:text-xs font-bold text-accent-dark tracking-wide flex items-center justify-center gap-1 mt-1 leading-none">
                                 <i class="fa-solid fa-circle-check text-accent text-[11px]"></i> <span>Bersih, Harum, Cepat, &amp; Manjur!</span>
                             </p>
                         </div>
-                        <p class="text-[10px] text-slate-600 mt-1 font-sans leading-tight">Jl. Raya Bersih Manjur No. 88, Kota Laundry<br>WA / Telp: 0812-3456-7890</p>
+                        <p id="print-company-address-phone" class="text-[10px] text-slate-600 mt-1 font-sans leading-tight">Jl. Raya Bersih Manjur No. 88, Kota Laundry<br>WA / Telp: 0812-3456-7890</p>
                     </div>
 
                     <div class="text-xs space-y-1 border-b border-dashed border-slate-400 pb-3 mb-3 font-mono">
@@ -2177,7 +2177,7 @@
             currentUser: null,
             currentRole: 'Owner',
             currentTab: 'dashboard',
-            printSize: '80mm',
+            printSize: '58mm',
             companyProfile: {
                 name: 'MANJUR LAUNDRY',
                 address: 'Jl. Raya Bersih Manjur No. 88, Kota Laundry',
@@ -2379,7 +2379,7 @@
 
         // ==================== SISTEM LOGIN & PASSWORD PROTECT ====================
         function checkLoginStatus() {
-            const loggedInUserStr = sessionStorage.getItem('manjur_logged_user');
+            const loggedInUserStr = localStorage.getItem('manjur_logged_user') || sessionStorage.getItem('manjur_logged_user');
             if (loggedInUserStr) {
                 const user = JSON.parse(loggedInUserStr);
                 const validUser = appState.users.find(u => (u.username || '').toLowerCase() === (user.username || '').toLowerCase() && u.password === user.password);
@@ -2390,6 +2390,15 @@
                 }
             }
             document.getElementById('login-screen').classList.remove('hidden');
+
+            const savedCreds = localStorage.getItem('manjur_saved_creds');
+            if (savedCreds) {
+                try {
+                    const parsedCreds = JSON.parse(savedCreds);
+                    if (parsedCreds.username) document.getElementById('login-username').value = parsedCreds.username;
+                    if (parsedCreds.password) document.getElementById('login-password').value = parsedCreds.password;
+                } catch (e) {}
+            }
         }
 
         function resetLoginData() {
@@ -2407,6 +2416,7 @@
                     saveData();
                     document.getElementById('login-username').value = 'owner';
                     document.getElementById('login-password').value = 'admin123';
+                    localStorage.setItem('manjur_saved_creds', JSON.stringify({ username: 'owner', password: 'admin123' }));
                     Swal.fire('Password Direset!', 'Akun login telah dikembalikan ke: username "owner" dan password "admin123". Silakan klik tombol Masuk ke Aplikasi.', 'success');
                 }
             });
@@ -2422,6 +2432,8 @@
             if (matchedUser) {
                 applyLoginUser(matchedUser);
                 sessionStorage.setItem('manjur_logged_user', JSON.stringify(matchedUser));
+                localStorage.setItem('manjur_logged_user', JSON.stringify(matchedUser));
+                localStorage.setItem('manjur_saved_creds', JSON.stringify({ username: uname, password: pass }));
                 document.getElementById('login-screen').classList.add('hidden');
                 
                 Swal.fire({
@@ -2480,8 +2492,16 @@
             }).then((res) => {
                 if (res.isConfirmed) {
                     sessionStorage.removeItem('manjur_logged_user');
+                    localStorage.removeItem('manjur_logged_user');
                     appState.currentUser = null;
-                    document.getElementById('login-password').value = '';
+                    const savedCreds = localStorage.getItem('manjur_saved_creds');
+                    if (savedCreds) {
+                        try {
+                            const parsedCreds = JSON.parse(savedCreds);
+                            if (parsedCreds.username) document.getElementById('login-username').value = parsedCreds.username;
+                            if (parsedCreds.password) document.getElementById('login-password').value = parsedCreds.password;
+                        } catch (e) {}
+                    }
                     document.getElementById('login-screen').classList.remove('hidden');
                 }
             });
@@ -3315,6 +3335,7 @@
 
         function openReceiptPreview(trx) {
             currentReceiptTrx = trx;
+            applyCompanyProfileToUI();
             const modal = document.getElementById('receipt-print-modal');
             modal.classList.remove('hidden');
 
@@ -3432,7 +3453,9 @@
                 itemsText = currentReceiptTrx.items.map(i => `\n  * ${i.serviceName} (${i.qty} ${i.unit})`).join('');
             }
 
-            const msg = `Halo kak *${currentReceiptTrx.customerName}*,\n\nTerima kasih telah mencuci di *MANJUR LAUNDRY*.\nBerikut rincian pesanan Anda:\n- No Nota: *${currentReceiptTrx.id}*\n- Rincian Layanan:${itemsText}\n- Total Tagihan: *${formatRupiah(currentReceiptTrx.totalCost)}*\n- Status Pembayaran: *${currentReceiptTrx.paymentStatus}*\n\n_Bersih, Harum, Cepat, & Manjur!_`;
+            const profName = (appState.companyProfile?.name || 'MANJUR LAUNDRY').toUpperCase();
+            const profTag = appState.companyProfile?.tagline || 'Bersih, Harum, Cepat, & Manjur!';
+            const msg = `Halo kak *${currentReceiptTrx.customerName}*,\n\nTerima kasih telah mencuci di *${profName}*.\nBerikut rincian pesanan Anda:\n- No Nota: *${currentReceiptTrx.id}*\n- Rincian Layanan:${itemsText}\n- Total Tagihan: *${formatRupiah(currentReceiptTrx.totalCost)}*\n- Status Pembayaran: *${currentReceiptTrx.paymentStatus}*\n\n_${profTag}_`;
             
             window.open(`https://api.whatsapp.com/send?phone=${waPhone}&text=${encodeURIComponent(msg)}`, '_blank');
         }
@@ -3681,13 +3704,14 @@
                     // Set Double Width + Double Height & Bold for Header
                     commands.push(new Uint8Array([0x1D, 0x21, 0x11]));
                     commands.push(new Uint8Array([0x1B, 0x45, 0x01]));
-                    commands.push(enc.encode("MANJUR LAUNDRY\n"));
+                    const prof = appState.companyProfile || DEFAULT_COMPANY_PROFILE;
+                    commands.push(enc.encode((prof.name || "MANJUR LAUNDRY").toUpperCase() + "\n"));
                     commands.push(new Uint8Array([0x1B, 0x45, 0x00])); // Bold OFF
                     commands.push(new Uint8Array([0x1D, 0x21, 0x00])); // Reset Normal Font Size
 
-                    commands.push(enc.encode("Bersih, Harum, Cepat, & Manjur!\n"));
-                    commands.push(enc.encode("Jl. Raya Bersih Manjur No. 88\n"));
-                    commands.push(enc.encode("WA / Telp: 0812-3456-7890\n"));
+                    if (prof.tagline) commands.push(enc.encode(prof.tagline + "\n"));
+                    if (prof.address) commands.push(enc.encode(prof.address + "\n"));
+                    if (prof.phone) commands.push(enc.encode("WA / Telp: " + prof.phone + "\n"));
                     commands.push(enc.encode(divider));
 
                     // Left alignment (ESC a 0)
