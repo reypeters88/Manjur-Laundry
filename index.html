@@ -18,6 +18,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
@@ -222,7 +223,113 @@
         .login-bg {
             background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #0284c7 100%);
         }
+
+        /* ==================== GLOBAL DARK MODE STYLES ==================== */
+        html.dark body, body.dark {
+            background-color: #0f172a !important;
+            color: #f8fafc !important;
+        }
+        .dark .glass-header {
+            background: rgba(15, 23, 42, 0.92) !important;
+            border-bottom: 1px solid rgba(51, 65, 85, 0.8) !important;
+            box-shadow: 0 4px 25px rgba(0, 0, 0, 0.5) !important;
+        }
+        .dark .nav-tab:not(.active-tab):not(.bg-primary) {
+            background: rgba(30, 41, 59, 0.8) !important;
+            border-color: rgba(51, 65, 85, 0.9) !important;
+            color: #cbd5e1 !important;
+        }
+        .dark .nav-tab:hover:not(.active-tab):not(.bg-primary) {
+            background: rgba(51, 65, 85, 0.98) !important;
+            border-color: #38bdf8 !important;
+            color: #38bdf8 !important;
+        }
+        .dark .bg-white {
+            background-color: #1e293b !important;
+            border-color: #334155 !important;
+            color: #f8fafc !important;
+        }
+        .dark .bg-slate-50, .dark .bg-gray-50 {
+            background-color: #0f172a !important;
+            border-color: #334155 !important;
+            color: #e2e8f0 !important;
+        }
+        .dark .bg-slate-100, .dark .bg-gray-100 {
+            background-color: #334155 !important;
+            border-color: #475569 !important;
+            color: #f1f5f9 !important;
+        }
+        .dark .border-slate-200, .dark .border-slate-300, .dark .border-slate-100, .dark .border-gray-200 {
+            border-color: #334155 !important;
+        }
+        .dark .text-slate-900, .dark .text-slate-800, .dark .text-gray-900, .dark .text-gray-800 {
+            color: #f8fafc !important;
+        }
+        .dark .text-slate-700, .dark .text-slate-600, .dark .text-gray-700, .dark .text-gray-600 {
+            color: #cbd5e1 !important;
+        }
+        .dark .text-navy {
+            color: #38bdf8 !important;
+        }
+        .dark input:not([type="checkbox"]):not([type="radio"]), 
+        .dark select, 
+        .dark textarea {
+            background-color: #0f172a !important;
+            border-color: #475569 !important;
+            color: #f8fafc !important;
+        }
+        .dark input:focus, .dark select:focus, .dark textarea:focus {
+            border-color: #38bdf8 !important;
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25) !important;
+        }
+        .dark table thead tr {
+            background-color: #0f172a !important;
+            color: #e2e8f0 !important;
+            border-bottom-color: #334155 !important;
+        }
+        .dark table tbody tr {
+            border-color: #334155 !important;
+        }
+        .dark table tbody tr:hover {
+            background-color: rgba(51, 65, 85, 0.5) !important;
+        }
+        .dark .swal2-popup {
+            background: #1e293b !important;
+            color: #f8fafc !important;
+            border: 1px solid #334155 !important;
+        }
+        .dark .swal2-title, .dark .swal2-html-container {
+            color: #f8fafc !important;
+        }
+        /* Nota Preview Kertas tetap Putih di dalam Modal */
+        .dark #receipt-print-area,
+        .dark #receipt-print-area .bg-white,
+        .dark #receipt-print-area .bg-slate-50 {
+            background-color: #ffffff !important;
+            color: #0f172a !important;
+        }
+        .dark #receipt-print-area .text-slate-900, 
+        .dark #receipt-print-area .text-slate-800, 
+        .dark #receipt-print-area .text-navy {
+            color: #0f172a !important;
+        }
+        .dark #receipt-print-area .text-slate-600, 
+        .dark #receipt-print-area .text-slate-700 {
+            color: #334155 !important;
+        }
+        .dark #receipt-print-area .border-slate-800,
+        .dark #receipt-print-area .border-navy {
+            border-color: #0f172a !important;
+        }
     </style>
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('manjur_theme_mode');
+            if (savedTheme === 'dark') {
+                document.documentElement.classList.add('dark');
+            }
+        })();
+    </script>
 </head>
 <body class="min-h-screen flex flex-col">
 
@@ -337,6 +444,12 @@
                             <span id="logged-user-role" class="text-[10px] font-bold text-accent uppercase leading-none">Owner</span>
                         </div>
                     </div>
+
+                    <!-- Tombol Toggle Mode Terang / Gelap -->
+                    <button id="theme-toggle-btn" onclick="toggleThemeMode()" title="Ganti Mode Tampilan (Terang / Gelap)" class="bg-slate-100 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-600 hover:border-primary text-slate-800 dark:text-amber-300 px-3 py-2 rounded-xl text-xs font-extrabold transition shadow-md flex items-center gap-1.5 shrink-0">
+                        <i id="theme-toggle-icon" class="fa-solid fa-moon text-indigo-600 dark:text-amber-300 text-sm"></i>
+                        <span id="theme-toggle-text" class="hidden md:inline">Mode Gelap</span>
+                    </button>
 
                     <!-- Tombol Pasang Aplikasi di HP -->
                     <button onclick="openInstallAppModal()" title="Instal Aplikasi Manjur Laundry di HP / Android" class="bg-gradient-to-r from-accent to-emerald-600 hover:from-emerald-600 hover:to-accent text-white px-3.5 py-2 rounded-xl text-xs font-bold transition shadow-md hover:shadow-accent/30 flex items-center gap-1.5 shrink-0 border border-emerald-400/30">
@@ -2308,6 +2421,7 @@
 
         // INISIALISASI APLIKASI
         window.addEventListener('DOMContentLoaded', () => {
+            initThemeMode();
             initPWAInstallEngine();
             initClock();
             loadData();
@@ -2317,6 +2431,65 @@
                 ThermalBluetoothPrinter.updateUIStatus();
             }
         });
+
+        function initThemeMode() {
+            const savedTheme = localStorage.getItem('manjur_theme_mode') || 'light';
+            appState.themeMode = savedTheme;
+            if (savedTheme === 'dark') {
+                document.documentElement.classList.add('dark');
+                document.body.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+                document.body.classList.remove('dark');
+            }
+            updateThemeToggleUI();
+        }
+
+        function toggleThemeMode() {
+            const isDark = document.documentElement.classList.contains('dark');
+            if (isDark) {
+                document.documentElement.classList.remove('dark');
+                document.body.classList.remove('dark');
+                appState.themeMode = 'light';
+                localStorage.setItem('manjur_theme_mode', 'light');
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'info',
+                    title: 'Mode Terang Aktif ☀️',
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+            } else {
+                document.documentElement.classList.add('dark');
+                document.body.classList.add('dark');
+                appState.themeMode = 'dark';
+                localStorage.setItem('manjur_theme_mode', 'dark');
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'success',
+                    title: 'Mode Gelap Aktif 🌙',
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+            }
+            updateThemeToggleUI();
+        }
+
+        function updateThemeToggleUI() {
+            const isDark = document.documentElement.classList.contains('dark');
+            const iconEl = document.getElementById('theme-toggle-icon');
+            const textEl = document.getElementById('theme-toggle-text');
+            if (!iconEl || !textEl) return;
+            if (isDark) {
+                iconEl.className = 'fa-solid fa-sun text-amber-400 text-sm animate-spin-slow';
+                textEl.innerText = 'Mode Terang';
+            } else {
+                iconEl.className = 'fa-solid fa-moon text-indigo-600 text-sm';
+                textEl.innerText = 'Mode Gelap';
+            }
+        }
 
         function initClock() {
             setInterval(() => {
