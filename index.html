@@ -1022,24 +1022,25 @@
                 </button>
             </div>
 
-            <!-- Services Grid Table -->
-            <div class="bg-white rounded-2xl border border-slate-100 shadow-card overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse text-sm">
-                        <thead>
-                            <tr class="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold text-xs uppercase tracking-wider">
-                                <th class="p-4">ID / Ikon</th>
-                                <th class="p-4">Nama Layanan</th>
-                                <th class="p-4">Kategori</th>
-                                <th class="p-4">Harga Satuan</th>
-                                <th class="p-4 text-center">Aksi (Owner Only)</th>
-                            </tr>
-                        </thead>
-                        <tbody id="services-table-body" class="divide-y divide-slate-100 font-medium">
-                            <!-- Populated dynamically -->
-                        </tbody>
-                    </table>
+            <!-- Tombol Buka/Tutup Semua dan Filter / Keterangan -->
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-4 bg-slate-50/80 p-3.5 rounded-xl border border-slate-200/60">
+                <div class="flex items-center gap-2 text-xs font-bold text-slate-600">
+                    <i class="fa-solid fa-layer-group text-primary"></i>
+                    <span>Daftar Layanan Per Kelompok (Klik header grup untuk melihat detail menu)</span>
                 </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="toggleAllServicesAccordion(true)" class="bg-white hover:bg-slate-100 text-slate-700 font-bold px-3 py-1.5 rounded-lg text-xs border border-slate-200 shadow-2xs transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-folder-open text-primary"></i> Buka Semua Grup
+                    </button>
+                    <button onclick="toggleAllServicesAccordion(false)" class="bg-white hover:bg-slate-100 text-slate-700 font-bold px-3 py-1.5 rounded-lg text-xs border border-slate-200 shadow-2xs transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-folder-closed text-slate-400"></i> Tutup Semua Grup
+                    </button>
+                </div>
+            </div>
+
+            <!-- Services Accordion Groups Container -->
+            <div id="services-accordion-container" class="space-y-4">
+                <!-- Populated dynamically by renderServicesTable() -->
             </div>
         </section>
 
@@ -1917,12 +1918,15 @@
                             <option value="Satuan">Satuan</option>
                             <option value="Express">Express / Kilat</option>
                             <option value="Karpet">Karpet / Permadani</option>
-                            <option value="Khusus">Lainnya / Khusus</option>
+                            <option value="ESD Industri">ESD & Uniform Industri</option>
+                            <option value="Treatment">Treatment / Khusus</option>
                         </select>
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Ikon FontAwesome</label>
                         <select id="srv-edit-icon" class="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 font-mono text-xs">
+                            <option value="fa-industry">&#xf275; fa-industry</option>
+                            <option value="fa-shield-halved">&#xf3ed; fa-shield-halved</option>
                             <option value="fa-shirt">&#xf553; fa-shirt</option>
                             <option value="fa-bolt">&#xf0e7; fa-bolt</option>
                             <option value="fa-iron">&#xf06d; fa-iron</option>
@@ -2213,7 +2217,8 @@
                 { id: 'srv-4', name: 'Cuci Satuan Jas / Kemeja', price: 20000, unit: 'Pcs', icon: 'fa-user-tie', category: 'Satuan' },
                 { id: 'srv-5', name: 'Cuci Bedcover Besar', price: 35000, unit: 'Pcs', icon: 'fa-bed', category: 'Satuan' },
                 { id: 'srv-6', name: 'Cuci Karpet Permadani', price: 15000, unit: 'Meter', icon: 'fa-scroll', category: 'Karpet' },
-                { id: 'srv-7', name: 'Treatment Spoting Noda Membandel', price: 10000, unit: 'Pcs', icon: 'fa-wand-magic-sparkles', category: 'Treatment' }
+                { id: 'srv-7', name: 'Treatment Spoting Noda Membandel', price: 10000, unit: 'Pcs', icon: 'fa-wand-magic-sparkles', category: 'Treatment' },
+                { id: 'srv-8', name: 'Cuci ESD Seragam Anti-Statis Industri', price: 25000, unit: 'Pcs', icon: 'fa-industry', category: 'ESD Industri' }
             ],
             inventory: [
                 { id: 'INV-1', itemName: 'Detergen Cair Premium', category: 'Sabun', stock: 25, unit: 'Liter', minStock: 5, unitPrice: 15000, lastRestock: '2026-07-01' },
@@ -2316,6 +2321,16 @@
                 const parsed = JSON.parse(saved);
                 appState.customers = parsed.customers || SAMPLE_DATA.customers;
                 appState.services = parsed.services || SAMPLE_DATA.services;
+                if (!appState.services.some(s => s.category === 'ESD Industri' || (s.name && s.name.toLowerCase().includes('esd')))) {
+                    appState.services.push({
+                        id: 'srv-8',
+                        name: 'Cuci ESD Seragam Anti-Statis Industri',
+                        price: 25000,
+                        unit: 'Pcs',
+                        icon: 'fa-industry',
+                        category: 'ESD Industri'
+                    });
+                }
                 appState.inventory = parsed.inventory || SAMPLE_DATA.inventory;
                 appState.finances = parsed.finances || SAMPLE_DATA.finances;
                 appState.transactions = parsed.transactions || SAMPLE_DATA.transactions;
@@ -2780,6 +2795,7 @@
         function getServiceCategory(s) {
             if (s.category && s.category.trim() !== '') return s.category.trim();
             const name = (s.name || '').toLowerCase();
+            if (name.includes('esd') || name.includes('industri') || name.includes('uniform') || name.includes('cleanroom')) return 'ESD Industri';
             if (name.includes('express') || name.includes('kilat') || name.includes('jam')) return 'Express';
             if (name.includes('kiloan') || s.unit === 'Kg') return 'Kiloan';
             if (name.includes('karpet') || name.includes('permadani') || s.unit === 'Meter') return 'Karpet';
@@ -2795,6 +2811,7 @@
             if (lower.includes('satuan')) return { name: c, icon: 'fa-user-tie', bg: 'bg-emerald-100 text-emerald-700 border border-emerald-200' };
             if (lower.includes('karpet')) return { name: c, icon: 'fa-scroll', bg: 'bg-purple-100 text-purple-700 border border-purple-200' };
             if (lower.includes('treatment') || lower.includes('spoting')) return { name: c, icon: 'fa-wand-magic-sparkles', bg: 'bg-rose-100 text-rose-700 border border-rose-200' };
+            if (lower.includes('esd') || lower.includes('industri')) return { name: c, icon: 'fa-industry', bg: 'bg-slate-800 text-amber-400 border border-slate-700' };
             return { name: c, icon: 'fa-tags', bg: 'bg-slate-100 text-slate-700 border border-slate-200' };
         }
 
@@ -3985,33 +4002,170 @@
 
         // ==================== [KHUSUS OWNER] MODUL LAYANAN & HARGA ====================
         function renderServicesTable() {
-            const tbody = document.getElementById('services-table-body');
-            if (!tbody) return;
-            tbody.innerHTML = '';
+            const container = document.getElementById('services-accordion-container');
+            if (!container) return;
+            container.innerHTML = '';
 
-            appState.services.forEach(s => {
-                tbody.innerHTML += `
-                    <tr class="hover:bg-slate-50/80 transition">
-                        <td class="p-4 font-mono font-bold text-navy text-xs flex items-center gap-2">
-                            <span class="w-8 h-8 rounded-lg bg-primary-light text-primary flex items-center justify-center text-sm">
-                                <i class="fa-solid ${s.icon || 'fa-shirt'}"></i>
-                            </span>
-                            <span>${s.id}</span>
-                        </td>
-                        <td class="p-4 font-bold text-slate-800">${s.name}</td>
-                        <td class="p-4"><span class="px-2.5 py-1 bg-slate-100 text-slate-700 rounded-md text-xs font-bold">${s.category || 'Kiloan'}</span></td>
-                        <td class="p-4 font-extrabold text-primary">${formatRupiah(s.price)} <span class="text-xs font-medium text-slate-500">/ ${s.unit}</span></td>
-                        <td class="p-4 text-center space-x-2">
-                            <button onclick="openEditServiceModal('${s.id}')" class="bg-amber-100 hover:bg-amber-500 text-amber-800 hover:text-white px-3 py-1.5 rounded-lg text-xs font-bold transition shadow-sm">
-                                <i class="fa-solid fa-pen"></i> Edit Harga
+            if (!appState.expandedServiceCategories) {
+                appState.expandedServiceCategories = ['Kiloan']; // Default terbuka Kiloan
+            }
+
+            const categoryGroups = [
+                { id: 'Kiloan', title: 'Cuci Kiloan', subtitle: 'Paket cucian reguler & harian hitungan per kilogram', icon: 'fa-scale-balanced', badgeBg: 'from-blue-600 to-indigo-600', textAccent: 'text-blue-600', borderAccent: 'border-blue-500/30' },
+                { id: 'Satuan', title: 'Cuci Satuan & Premium', subtitle: 'Paket cuci jas, kemeja, bedcover, dan pakaian khusus', icon: 'fa-shirt', badgeBg: 'from-emerald-600 to-teal-600', textAccent: 'text-emerald-600', borderAccent: 'border-emerald-500/30' },
+                { id: 'Express', title: 'Cuci Express / Kilat', subtitle: 'Layanan cepat saji & kilat (6 jam - 24 jam selesai)', icon: 'fa-bolt', badgeBg: 'from-amber-500 to-orange-600', textAccent: 'text-amber-600', borderAccent: 'border-amber-500/30' },
+                { id: 'Karpet', title: 'Karpet & Permadani', subtitle: 'Perawatan karpet rumah, kantor, masjid & barang besar', icon: 'fa-scroll', badgeBg: 'from-purple-600 to-indigo-600', textAccent: 'text-purple-600', borderAccent: 'border-purple-500/30' },
+                { id: 'ESD Industri', title: 'ESD & Uniform Industri', subtitle: 'Cuci pakaian anti-statis (ESD), wearpack, cleanroom & seragam pabrik', icon: 'fa-industry', badgeBg: 'from-slate-700 via-zinc-800 to-neutral-900', textAccent: 'text-slate-700', borderAccent: 'border-slate-600/40' },
+                { id: 'Treatment', title: 'Treatment & Layanan Khusus', subtitle: 'Spoting noda membandel, bleaching, & perawatan ekstra', icon: 'fa-wand-magic-sparkles', badgeBg: 'from-cyan-600 to-sky-600', textAccent: 'text-cyan-600', borderAccent: 'border-cyan-500/30' }
+            ];
+
+            const existingCategories = [...new Set(appState.services.map(s => s.category || 'Kiloan'))];
+            existingCategories.forEach(cat => {
+                if (!categoryGroups.some(g => g.id === cat)) {
+                    categoryGroups.push({
+                        id: cat,
+                        title: `Layanan ${cat}`,
+                        subtitle: `Kelompok layanan kategori ${cat}`,
+                        icon: 'fa-tags',
+                        badgeBg: 'from-slate-600 to-slate-800',
+                        textAccent: 'text-slate-600',
+                        borderAccent: 'border-slate-400/30'
+                    });
+                }
+            });
+
+            categoryGroups.forEach(group => {
+                const servicesInCat = appState.services.filter(s => (s.category || 'Kiloan') === group.id);
+                const isExpanded = appState.expandedServiceCategories.includes(group.id);
+                const chevronIcon = isExpanded ? 'fa-chevron-up' : 'fa-chevron-down';
+                const cardBorder = isExpanded ? `border-2 ${group.borderAccent} shadow-md` : 'border border-slate-200/80 hover:border-slate-300 shadow-sm';
+
+                let itemsHtml = '';
+                if (servicesInCat.length === 0) {
+                    itemsHtml = `
+                        <div class="p-8 text-center bg-slate-50/50 rounded-xl border border-dashed border-slate-200 m-4">
+                            <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-2.5 text-lg">
+                                <i class="fa-solid fa-box-open"></i>
+                            </div>
+                            <p class="text-xs font-bold text-slate-600 mb-1">Belum ada menu di kelompok ${group.title}</p>
+                            <p class="text-[11px] text-slate-400 mb-3.5">Klik tombol di bawah untuk menambahkan menu ke kategori ini</p>
+                            <button onclick="openServiceModalWithCategory('${group.id}')" class="bg-white hover:bg-slate-100 text-slate-700 font-bold px-3.5 py-2 rounded-lg text-xs border border-slate-200 shadow-2xs transition inline-flex items-center gap-1.5">
+                                <i class="fa-solid fa-plus text-amber-500"></i> Tambah Layanan ${group.id}
                             </button>
-                            <button onclick="deleteServiceItem('${s.id}')" class="bg-rose-50 hover:bg-rose-500 text-rose-600 hover:text-white px-2.5 py-1.5 rounded-lg text-xs font-bold transition">
-                                <i class="fa-solid fa-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
+                        </div>
+                    `;
+                } else {
+                    itemsHtml = `
+                        <div class="p-4 border-t border-slate-100 bg-slate-50/30">
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left border-collapse text-sm bg-white rounded-xl overflow-hidden shadow-2xs border border-slate-100">
+                                    <thead>
+                                        <tr class="bg-slate-100/70 border-b border-slate-200/80 text-slate-600 font-bold text-[11px] uppercase tracking-wider">
+                                            <th class="p-3.5 pl-4">ID & Ikon</th>
+                                            <th class="p-3.5">Nama Layanan</th>
+                                            <th class="p-3.5">Satuan</th>
+                                            <th class="p-3.5">Harga</th>
+                                            <th class="p-3.5 text-center pr-4">Aksi Owner</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-100 font-medium">
+                                        ${servicesInCat.map(s => `
+                                            <tr class="hover:bg-primary/5 transition group/row">
+                                                <td class="p-3.5 pl-4 font-mono font-bold text-navy text-xs flex items-center gap-3">
+                                                    <span class="w-9 h-9 rounded-xl bg-slate-100 group-hover/row:bg-primary-light text-slate-700 group-hover/row:text-primary flex items-center justify-center text-sm shadow-inner transition">
+                                                        <i class="fa-solid ${s.icon || 'fa-shirt'}"></i>
+                                                    </span>
+                                                    <span class="bg-slate-100 px-2 py-0.5 rounded text-[11px] font-mono text-slate-600">${s.id}</span>
+                                                </td>
+                                                <td class="p-3.5 font-bold text-slate-800 text-sm sm:text-base">${s.name}</td>
+                                                <td class="p-3.5">
+                                                    <span class="px-2.5 py-1 bg-slate-100 text-slate-700 rounded-lg text-xs font-bold border border-slate-200/60 inline-flex items-center gap-1">
+                                                        <i class="fa-solid fa-tag text-[10px] text-slate-400"></i> Per ${s.unit}
+                                                    </span>
+                                                </td>
+                                                <td class="p-3.5 font-black ${group.textAccent} text-sm sm:text-base">
+                                                    ${formatRupiah(s.price)} <span class="text-xs font-semibold text-slate-400">/ ${s.unit}</span>
+                                                </td>
+                                                <td class="p-3.5 pr-4 text-center">
+                                                    <div class="flex items-center justify-center gap-2">
+                                                        <button onclick="openEditServiceModal('${s.id}')" class="bg-amber-50 sm:bg-amber-100 hover:bg-amber-500 text-amber-800 hover:text-white px-3 py-1.5 rounded-xl text-xs font-bold transition shadow-2xs flex items-center gap-1.5" title="Edit Harga & Paket">
+                                                            <i class="fa-solid fa-pen text-[11px]"></i> <span>Edit</span>
+                                                        </button>
+                                                        <button onclick="deleteServiceItem('${s.id}')" class="bg-rose-50 hover:bg-rose-500 text-rose-600 hover:text-white px-2.5 py-1.5 rounded-xl text-xs font-bold transition shadow-2xs flex items-center justify-center" title="Hapus Layanan">
+                                                            <i class="fa-solid fa-trash text-[11px]"></i>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                container.innerHTML += `
+                    <div class="bg-white rounded-2xl transition-all duration-300 overflow-hidden ${cardBorder}">
+                        <!-- Accordion Header -->
+                        <div onclick="toggleServiceCategory('${group.id}')" class="p-5 cursor-pointer hover:bg-slate-50/80 transition flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 select-none">
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br ${group.badgeBg} text-white flex items-center justify-center text-xl sm:text-2xl font-black shadow-md shrink-0">
+                                    <i class="fa-solid ${group.icon}"></i>
+                                </div>
+                                <div>
+                                    <div class="flex items-center gap-2.5 flex-wrap mb-1">
+                                        <h4 class="text-base sm:text-lg font-black text-navy tracking-tight">${group.title}</h4>
+                                        <span class="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-slate-100 text-slate-700 border border-slate-200">
+                                            ${servicesInCat.length} Menu
+                                        </span>
+                                    </div>
+                                    <p class="text-xs text-slate-500 font-medium leading-relaxed">${group.subtitle}</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end border-t sm:border-t-0 pt-3 sm:pt-0 border-slate-100">
+                                <button type="button" onclick="event.stopPropagation(); openServiceModalWithCategory('${group.id}')" class="bg-amber-50 hover:bg-amber-500 text-amber-700 hover:text-white font-extrabold px-3.5 py-2 rounded-xl text-xs border border-amber-200/80 hover:border-amber-500 transition shadow-2xs flex items-center gap-1.5 shrink-0">
+                                    <i class="fa-solid fa-plus"></i> Tambah ${group.id}
+                                </button>
+                                <div class="w-9 h-9 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center text-sm transition-transform duration-300 ${isExpanded ? 'bg-primary/10 text-primary' : ''}">
+                                    <i class="fa-solid ${chevronIcon} transition-transform duration-300"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Accordion Content -->
+                        <div id="acc-content-${group.id}" class="transition-all duration-300 ${isExpanded ? 'block' : 'hidden'}">
+                            ${itemsHtml}
+                        </div>
+                    </div>
                 `;
             });
+        }
+
+        function toggleServiceCategory(category) {
+            if (!appState.expandedServiceCategories) {
+                appState.expandedServiceCategories = ['Kiloan'];
+            }
+            const idx = appState.expandedServiceCategories.indexOf(category);
+            if (idx > -1) {
+                appState.expandedServiceCategories.splice(idx, 1);
+            } else {
+                appState.expandedServiceCategories.push(category);
+            }
+            renderServicesTable();
+        }
+
+        function toggleAllServicesAccordion(expand) {
+            if (expand) {
+                appState.expandedServiceCategories = ['Kiloan', 'Satuan', 'Express', 'Karpet', 'ESD Industri', 'Treatment'];
+                const existingCategories = [...new Set(appState.services.map(s => s.category || 'Kiloan'))];
+                existingCategories.forEach(cat => {
+                    if (!appState.expandedServiceCategories.includes(cat)) appState.expandedServiceCategories.push(cat);
+                });
+            } else {
+                appState.expandedServiceCategories = [];
+            }
+            renderServicesTable();
         }
 
         function openServiceModal() {
@@ -4023,6 +4177,31 @@
             document.getElementById('srv-edit-category').value = 'Kiloan';
             document.getElementById('srv-edit-icon').value = 'fa-shirt';
             document.getElementById('service-modal').classList.remove('hidden');
+        }
+
+        function openServiceModalWithCategory(category) {
+            openServiceModal();
+            if (category) {
+                const catInput = document.getElementById('srv-edit-category');
+                if (catInput) catInput.value = category;
+                
+                const unitInput = document.getElementById('srv-edit-unit');
+                if (unitInput) {
+                    if (category === 'Kiloan' || category === 'Express') unitInput.value = 'Kg';
+                    else if (category === 'Satuan' || category === 'Treatment' || category === 'ESD Industri') unitInput.value = 'Pcs';
+                    else if (category === 'Karpet') unitInput.value = 'Meter';
+                }
+                
+                const iconInput = document.getElementById('srv-edit-icon');
+                if (iconInput) {
+                    if (category === 'Kiloan') iconInput.value = 'fa-shirt';
+                    else if (category === 'Express') iconInput.value = 'fa-bolt';
+                    else if (category === 'Satuan') iconInput.value = 'fa-user-tie';
+                    else if (category === 'Karpet') iconInput.value = 'fa-scroll';
+                    else if (category === 'Treatment') iconInput.value = 'fa-wand-magic-sparkles';
+                    else if (category === 'ESD Industri') iconInput.value = 'fa-industry';
+                }
+            }
         }
 
         function openEditServiceModal(serviceId) {
@@ -4066,6 +4245,10 @@
                     category: category,
                     icon: icon
                 });
+            }
+
+            if (category && appState.expandedServiceCategories && !appState.expandedServiceCategories.includes(category)) {
+                appState.expandedServiceCategories.push(category);
             }
 
             saveData();
