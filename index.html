@@ -186,18 +186,20 @@
 
         /* Screen preview dimensions for print sizes */
         .thermal-receipt.print-58mm {
-            width: 260px;
+            width: 240px;
             max-width: 100%;
             margin: 0 auto;
-            font-size: 11px;
-            padding: 16px;
+            font-size: 9.5px;
+            padding: 10px 12px;
+            line-height: 1.25;
         }
         .thermal-receipt.print-80mm {
-            width: 360px;
+            width: 350px;
             max-width: 100%;
             margin: 0 auto;
-            font-size: 12px;
-            padding: 24px;
+            font-size: 11.5px;
+            padding: 18px 20px;
+            line-height: 1.3;
         }
         .thermal-receipt.print-a4 {
             width: 100%;
@@ -205,6 +207,16 @@
             margin: 0 auto;
             font-size: 14px;
             padding: 32px;
+        }
+
+        @media print {
+            .thermal-receipt.print-58mm {
+                width: 58mm !important;
+                max-width: 58mm !important;
+                font-size: 9px !important;
+                padding: 3mm !important;
+                line-height: 1.2 !important;
+            }
         }
 
         .login-bg {
@@ -742,7 +754,7 @@
                             <h3 class="text-lg font-bold text-navy flex items-center gap-2">
                                 <i class="fa-solid fa-receipt text-accent"></i> Rincian Pembayaran
                             </h3>
-                            <span id="pos-order-id-preview" class="text-xs font-mono bg-slate-100 px-2.5 py-1 rounded-md text-slate-600 font-bold">TRX-AUTO</span>
+                            <span id="pos-order-id-preview" class="text-xs font-mono bg-slate-100 px-2.5 py-1 rounded-md text-slate-600 font-bold">MJL-AUTO</span>
                         </div>
 
                         <!-- Daftar Layanan dalam Nota (Cart Items) -->
@@ -1579,7 +1591,7 @@
                             <p id="live-preview-prof-phone" class="text-[10px] font-bold text-slate-700 mt-0.5">WA/Telp: 0812-3456-7890</p>
 
                             <div class="border-t border-dashed border-slate-400 my-3 pt-2 text-[10px] text-slate-500 text-left">
-                                <div class="flex justify-between"><span>No Nota:</span><span class="font-bold text-slate-800">TRX-DEMO</span></div>
+                                <div class="flex justify-between"><span>No Nota:</span><span class="font-bold text-slate-800">MJL-DEMO</span></div>
                                 <div class="flex justify-between"><span>Pelanggan:</span><span class="font-bold text-slate-800">Pelanggan Setia</span></div>
                             </div>
                         </div>
@@ -1639,7 +1651,7 @@
                     </div>
 
                     <div class="text-xs space-y-1 border-b border-dashed border-slate-400 pb-3 mb-3 font-mono">
-                        <div class="flex justify-between"><span>No Nota:</span> <span class="font-bold" id="rc-id">TRX-001</span></div>
+                        <div class="flex justify-between"><span>No Nota:</span> <span class="font-bold" id="rc-id">MJL-150726-001</span></div>
                         <div class="flex justify-between"><span>Tanggal:</span> <span id="rc-date">07/07/2026 14:30</span></div>
                         <div class="flex justify-between"><span>Kasir:</span> <span id="rc-cashier">Kasir Manjur</span></div>
                         <div class="flex justify-between"><span>Pelanggan:</span> <span class="font-bold" id="rc-cust">Budi Santoso</span></div>
@@ -2229,16 +2241,16 @@
                 { id: 'INV-6', itemName: 'Gas LPG 3 Kg (Setrika Uap)', category: 'Operasional', stock: 4, unit: 'Tabung', minStock: 2, unitPrice: 22000, lastRestock: '2026-07-05' }
             ],
             finances: [
-                { id: 'FIN-101', type: 'Pemasukan', category: 'Transaksi Laundry', description: 'Pemasukan dari nota #MJR-072026-0001 (Budi Santoso)', amount: 45000, date: '2026-07-05T10:00:00' },
-                { id: 'FIN-102', type: 'Pemasukan', category: 'Transaksi Laundry', description: 'Pemasukan dari nota #MJR-072026-0002 (Siti Aminah)', amount: 60000, date: '2026-07-06T11:30:00' },
+                { id: 'FIN-101', type: 'Pemasukan', category: 'Transaksi Laundry', description: 'Pemasukan dari nota #MJL-050726-001 (Budi Santoso)', amount: 45000, date: '2026-07-05T10:00:00' },
+                { id: 'FIN-102', type: 'Pemasukan', category: 'Transaksi Laundry', description: 'Pemasukan dari nota #MJL-060726-002 (Siti Aminah)', amount: 60000, date: '2026-07-06T11:30:00' },
                 { id: 'FIN-103', type: 'Pengeluaran', category: 'Operasional', description: 'Bayar tagihan listrik PLN bulan Juni', amount: 350000, date: '2026-07-06T14:00:00' },
-                { id: 'FIN-104', type: 'Pemasukan', category: 'Transaksi Laundry', description: 'Pemasukan dari nota #MJR-072026-0003 (Rahmat Hidayat)', amount: 35000, date: '2026-07-07T09:15:00' }
+                { id: 'FIN-104', type: 'Pemasukan', category: 'Transaksi Laundry', description: 'Pemasukan dari nota #MJL-070726-003 (Rahmat Hidayat)', amount: 35000, date: '2026-07-07T09:15:00' }
             ],
             transactions: [
-                { id: 'MJR-072026-0001', customerId: 'CUST-001', customerName: 'Budi Santoso', serviceId: 'srv-1', serviceName: 'Cuci Kiloan Reguler', qty: 5, isExpress: false, discount: 5000, totalCost: 45000, paidAmount: 45000, status: 'Selesai', paymentStatus: 'Lunas', paymentMethod: 'Tunai', date: '2026-07-05T10:00:00', notes: 'Pakaian kantor' },
-                { id: 'MJR-072026-0002', customerId: 'CUST-002', customerName: 'Siti Aminah', serviceId: 'srv-2', serviceName: 'Cuci Kiloan Express (6 Jam)', qty: 4.5, isExpress: true, discount: 3000, totalCost: 60000, paidAmount: 60000, status: 'Setrika', paymentStatus: 'Lunas', paymentMethod: 'QRIS', date: '2026-07-06T11:30:00', notes: 'Wangi sakura' },
-                { id: 'MJR-072026-0003', customerId: 'CUST-003', customerName: 'Rahmat Hidayat', serviceId: 'srv-5', serviceName: 'Cuci Bedcover Besar', qty: 1, isExpress: false, discount: 0, totalCost: 35000, paidAmount: 35000, status: 'Dicuci', paymentStatus: 'Lunas', paymentMethod: 'Tunai', date: '2026-07-07T09:15:00', notes: 'Bedcover king size' },
-                { id: 'MJR-072026-0004', customerId: 'CUST-001', customerName: 'Budi Santoso', serviceId: 'srv-1', serviceName: 'Cuci Kiloan Reguler (+1 layanan lain)', qty: 4, unit: 'Kg', isExpress: false, perfumePrice: 0, spottingPrice: 10000, discount: 0, totalCost: 48000, paidAmount: 50000, status: 'Antrean', paymentStatus: 'Lunas', paymentMethod: 'Tunai', date: '2026-07-08T08:15:00', notes: 'Ada noda di kerah', items: [
+                { id: 'MJL-050726-001', customerId: 'CUST-001', customerName: 'Budi Santoso', serviceId: 'srv-1', serviceName: 'Cuci Kiloan Reguler', qty: 5, isExpress: false, discount: 5000, totalCost: 45000, paidAmount: 45000, status: 'Selesai', paymentStatus: 'Lunas', paymentMethod: 'Tunai', date: '2026-07-05T10:00:00', notes: 'Pakaian kantor' },
+                { id: 'MJL-060726-002', customerId: 'CUST-002', customerName: 'Siti Aminah', serviceId: 'srv-2', serviceName: 'Cuci Kiloan Express (6 Jam)', qty: 4.5, isExpress: true, discount: 3000, totalCost: 60000, paidAmount: 60000, status: 'Setrika', paymentStatus: 'Lunas', paymentMethod: 'QRIS', date: '2026-07-06T11:30:00', notes: 'Wangi sakura' },
+                { id: 'MJL-070726-003', customerId: 'CUST-003', customerName: 'Rahmat Hidayat', serviceId: 'srv-5', serviceName: 'Cuci Bedcover Besar', qty: 1, isExpress: false, discount: 0, totalCost: 35000, paidAmount: 35000, status: 'Dicuci', paymentStatus: 'Lunas', paymentMethod: 'Tunai', date: '2026-07-07T09:15:00', notes: 'Bedcover king size' },
+                { id: 'MJL-080726-004', customerId: 'CUST-001', customerName: 'Budi Santoso', serviceId: 'srv-1', serviceName: 'Cuci Kiloan Reguler (+1 layanan lain)', qty: 4, unit: 'Kg', isExpress: false, perfumePrice: 0, spottingPrice: 10000, discount: 0, totalCost: 48000, paidAmount: 50000, status: 'Antrean', paymentStatus: 'Lunas', paymentMethod: 'Tunai', date: '2026-07-08T08:15:00', notes: 'Ada noda di kerah', items: [
                     { serviceId: 'srv-1', serviceName: 'Cuci Kiloan Reguler (2 Hari)', price: 7000, qty: 4, unit: 'Kg', subtotal: 28000 },
                     { serviceId: 'srv-4', serviceName: 'Cuci Satuan Jas / Kemeja', price: 20000, qty: 1, unit: 'Pcs', spottingPrice: 10000, subtotal: 30000, notes: 'Spoting noda tinta membandel' }
                 ]}
@@ -2334,6 +2346,32 @@
                 appState.inventory = parsed.inventory || SAMPLE_DATA.inventory;
                 appState.finances = parsed.finances || SAMPLE_DATA.finances;
                 appState.transactions = parsed.transactions || SAMPLE_DATA.transactions;
+                if (Array.isArray(appState.transactions)) {
+                    appState.transactions.forEach((t, idx) => {
+                        if (t && t.id && (t.id.startsWith('TRX-') || t.id.startsWith('MJR-') || (t.id.startsWith('MJL-') && t.id.split('-')[1] && t.id.split('-')[1].length === 8))) {
+                            const d = new Date(t.date || new Date());
+                            const day = String(d.getDate()).padStart(2, '0');
+                            const month = String(d.getMonth() + 1).padStart(2, '0');
+                            const year = String(d.getFullYear()).slice(-2);
+                            const parts = t.id.split('-');
+                            let seq = parts[parts.length - 1];
+                            const num = parseInt(seq, 10);
+                            if (isNaN(num)) seq = String(appState.transactions.length - idx).padStart(3, '0');
+                            else seq = String(num).padStart(3, '0');
+                            
+                            const oldId = t.id;
+                            const newId = `MJL-${day}${month}${year}-${seq}`;
+                            t.id = newId;
+                            if (Array.isArray(appState.finances)) {
+                                appState.finances.forEach(f => {
+                                    if (f.description && f.description.includes(oldId)) {
+                                        f.description = f.description.replace(oldId, newId);
+                                    }
+                                });
+                            }
+                        }
+                    });
+                }
                 appState.companyProfile = parsed.companyProfile || JSON.parse(JSON.stringify(DEFAULT_COMPANY_PROFILE));
                 
                 if (parsed.users && Array.isArray(parsed.users) && parsed.users.length > 0 && parsed.users.some(u => u.username)) {
@@ -3219,26 +3257,50 @@
 
         function generateNotaNumber(targetDate = new Date()) {
             const d = new Date(targetDate);
+            const day = String(d.getDate()).padStart(2, '0');
             const month = String(d.getMonth() + 1).padStart(2, '0');
-            const year = String(d.getFullYear());
-            const prefix = `MJR-${month}${year}-`;
+            const year = String(d.getFullYear()).slice(-2);
+            const fullYear = String(d.getFullYear());
+            const todayPrefix = `MJL-${day}${month}${year}-`;
 
             let maxSeq = 0;
             if (appState && Array.isArray(appState.transactions)) {
                 appState.transactions.forEach(t => {
-                    if (t && t.id && typeof t.id === 'string' && t.id.startsWith(prefix)) {
+                    if (t && t.id && typeof t.id === 'string' && t.id.startsWith('MJL-')) {
                         const parts = t.id.split('-');
-                        const lastPart = parts[parts.length - 1];
-                        const num = parseInt(lastPart, 10);
-                        if (!isNaN(num) && num > maxSeq) {
-                            maxSeq = num;
+                        if (parts.length >= 3) {
+                            const dateCode = parts[1]; // misal '150726' atau '15072026'
+                            const seqStr = parts[parts.length - 1];
+                            const num = parseInt(seqStr, 10);
+
+                            let isSameMonthYear = false;
+                            if (dateCode.length === 6) {
+                                // Format DDMMYY (baru) -> slice(2,4) adalah bulan, slice(4,6) adalah tahun 2 digit
+                                if (dateCode.slice(2, 4) === month && dateCode.slice(4, 6) === year) {
+                                    isSameMonthYear = true;
+                                }
+                            } else if (dateCode.length === 8) {
+                                // Format lama DDMMYYYY -> slice(2,4) adalah bulan, slice(4,8) adalah tahun 4 digit
+                                if (dateCode.slice(2, 4) === month && dateCode.slice(4, 8) === fullYear) {
+                                    isSameMonthYear = true;
+                                }
+                            } else if (t.date) {
+                                const tDate = new Date(t.date);
+                                if (!isNaN(tDate.getTime()) && (tDate.getMonth() + 1) === (d.getMonth() + 1) && tDate.getFullYear() === d.getFullYear()) {
+                                    isSameMonthYear = true;
+                                }
+                            }
+
+                            if (isSameMonthYear && !isNaN(num) && num > maxSeq) {
+                                maxSeq = num;
+                            }
                         }
                     }
                 });
             }
 
-            const nextSeq = String(maxSeq + 1).padStart(4, '0');
-            return `${prefix}${nextSeq}`;
+            const nextSeq = String(maxSeq + 1).padStart(3, '0');
+            return `${todayPrefix}${nextSeq}`;
         }
 
         function updatePosOrderIdPreview() {
@@ -3350,95 +3412,312 @@
         // ==================== MODUL PRINT RECEIPT THERMAL ====================
         let currentReceiptTrx = null;
 
+        function getEstimatedFinishDate(trx) {
+            const dt = new Date(trx.date || Date.now());
+            let hoursToAdd = 48; // Reguler 2 Hari
+            const sName = (trx.serviceName || '').toLowerCase();
+            if (trx.isExpress || sName.includes('express') || sName.includes('6 jam') || sName.includes('kilat')) {
+                hoursToAdd = 6;
+            } else if (sName.includes('24 jam') || sName.includes('1 hari') || sName.includes('besok')) {
+                hoursToAdd = 24;
+            } else if (sName.includes('satuan') || sName.includes('karpet') || sName.includes('bedcover')) {
+                hoursToAdd = 72; // 3 Hari
+            }
+            dt.setHours(dt.getHours() + hoursToAdd);
+            return dt.toLocaleString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+        }
+
+        function renderReceiptDOM(trx, size) {
+            const area = document.getElementById('receipt-print-area');
+            if (!area || !trx) return;
+            const prof = appState.companyProfile || DEFAULT_COMPANY_PROFILE;
+            const dtStr = new Date(trx.date || Date.now()).toLocaleString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+            const estStr = getEstimatedFinishDate(trx);
+            const isExpress = trx.isExpress || (trx.serviceName || '').toLowerCase().includes('express') || (trx.serviceName || '').toLowerCase().includes('6 jam');
+            const cashierName = appState.currentUser?.name || 'Kasir Manjur';
+
+            let totalSrvOnly = 0;
+            let totalSpottingOnly = trx.spottingPrice || 0;
+            let itemsRowsHTML = '';
+
+            if (trx.items && trx.items.length > 0) {
+                totalSpottingOnly = trx.items.reduce((sum, i) => sum + (i.spottingPrice || 0), 0);
+                itemsRowsHTML = trx.items.map((item, index) => {
+                    const itemSrvCost = item.price * item.qty;
+                    totalSrvOnly += itemSrvCost;
+                    if (size === 'a4') {
+                        return `
+                            <tr class="${index % 2 === 0 ? 'bg-white' : 'bg-slate-50'} border-b border-slate-200">
+                                <td class="py-2.5 px-3 text-center font-bold text-slate-700">${index + 1}</td>
+                                <td class="py-2.5 px-3">
+                                    <div class="font-extrabold text-navy text-sm">${item.serviceName}</div>
+                                    ${item.spottingPrice > 0 ? `<div class="text-xs text-amber-700 font-semibold mt-0.5"><i class="fa-solid fa-wand-magic-sparkles"></i> + Spoting Noda (${formatRupiah(item.spottingPrice)})</div>` : ''}
+                                    ${item.notes ? `<div class="text-xs text-slate-500 italic mt-0.5">Catatan: ${item.notes}</div>` : ''}
+                                </td>
+                                <td class="py-2.5 px-3 text-right font-bold text-slate-800">${item.qty} ${item.unit || 'Kg'}</td>
+                                <td class="py-2.5 px-3 text-right text-slate-600">${formatRupiah(item.price)}</td>
+                                <td class="py-2.5 px-3 text-right font-extrabold text-navy">${formatRupiah(itemSrvCost)}</td>
+                            </tr>
+                        `;
+                    } else {
+                        const is58 = (size === '58mm');
+                        return `
+                            <div class="${is58 ? 'py-0.5' : 'py-1'} border-b border-dashed border-slate-200">
+                                <div class="flex justify-between items-start gap-1">
+                                    <span class="font-bold text-slate-900 leading-tight ${is58 ? 'text-[9.5px]' : 'text-xs'}">${item.serviceName}</span>
+                                    <span class="font-bold whitespace-nowrap text-slate-900 ${is58 ? 'text-[9.5px]' : 'text-xs'}">${formatRupiah(itemSrvCost)}</span>
+                                </div>
+                                <div class="text-slate-600 flex justify-between items-center ${is58 ? 'text-[8.5px]' : 'text-[10px]'} mt-0.5">
+                                    <span>${item.qty} ${item.unit || 'Kg'} x ${formatRupiah(item.price)}</span>
+                                </div>
+                                ${item.spottingPrice > 0 ? `<div class="${is58 ? 'text-[8px]' : 'text-[9.5px]'} text-amber-800 italic">+ Spoting (${formatRupiah(item.spottingPrice)})</div>` : ''}
+                                ${item.notes ? `<div class="${is58 ? 'text-[8px]' : 'text-[9.5px]'} text-slate-600 italic">Note: ${item.notes}</div>` : ''}
+                            </div>
+                        `;
+                    }
+                }).join('');
+            } else {
+                totalSrvOnly = (trx.totalCost + (trx.discount || 0)) - (trx.perfumePrice || 0) - (trx.spottingPrice || 0);
+                if (size === 'a4') {
+                    itemsRowsHTML = `
+                        <tr class="bg-white border-b border-slate-200">
+                            <td class="py-3 px-3 text-center font-bold text-slate-700">1</td>
+                            <td class="py-3 px-3">
+                                <div class="font-extrabold text-navy text-sm">${trx.serviceName}</div>
+                                ${trx.notes ? `<div class="text-xs text-slate-500 italic mt-0.5">Catatan: ${trx.notes}</div>` : ''}
+                            </td>
+                            <td class="py-3 px-3 text-right font-bold text-slate-800">${trx.qty} ${trx.unit || 'Kg'}</td>
+                            <td class="py-3 px-3 text-right text-slate-600">${formatRupiah(totalSrvOnly / (trx.qty || 1))}</td>
+                            <td class="py-3 px-3 text-right font-extrabold text-navy">${formatRupiah(totalSrvOnly)}</td>
+                        </tr>
+                    `;
+                } else {
+                    const is58 = (size === '58mm');
+                    itemsRowsHTML = `
+                        <div class="${is58 ? 'py-0.5' : 'py-1'} border-b border-dashed border-slate-200">
+                            <div class="flex justify-between items-start gap-1">
+                                <span class="font-bold text-slate-900 leading-tight ${is58 ? 'text-[9.5px]' : 'text-xs'}">${trx.serviceName}</span>
+                                <span class="font-bold whitespace-nowrap text-slate-900 ${is58 ? 'text-[9.5px]' : 'text-xs'}">${formatRupiah(totalSrvOnly)}</span>
+                            </div>
+                            <div class="text-slate-600 font-normal ${is58 ? 'text-[8.5px]' : 'text-[10px]'} mt-0.5">${trx.qty} ${trx.unit || 'Kg'} x ${formatRupiah(totalSrvOnly / (trx.qty || 1))}</div>
+                        </div>
+                    `;
+                }
+            }
+
+            const change = (trx.paidAmount || 0) - trx.totalCost;
+            const changeStr = change >= 0 ? formatRupiah(change) : 'Rp 0 (Belum Lunas)';
+            const statusClass = (trx.paymentStatus || 'Lunas') === 'Lunas' 
+                ? (size === 'a4' ? 'bg-emerald-600 text-white' : 'bg-emerald-600 text-white') 
+                : (size === 'a4' ? 'bg-rose-600 text-white' : 'bg-rose-600 text-white');
+
+            if (size === 'a4') {
+                // ================== LAYOUT FORMAL INVOICE A4 ==================
+                area.innerHTML = `
+                    <div class="bg-white p-8 text-slate-900 font-sans shadow-lg rounded-xl border border-slate-200">
+                        <!-- Header 2 Kolom -->
+                        <div class="flex justify-between items-start border-b-2 border-navy pb-6 mb-6">
+                            <div class="flex items-center gap-4">
+                                <img id="print-logo-img" src="logo_manjur.png" alt="Logo Manjur Laundry" class="h-20 w-auto object-contain" crossorigin="anonymous">
+                                <div>
+                                    <h2 class="text-2xl font-black text-navy tracking-tight uppercase">${prof.name || 'MANJUR LAUNDRY'}</h2>
+                                    <p class="text-xs font-bold text-accent-dark mt-0.5">${prof.tagline || 'Bersih, Harum, Cepat, & Manjur!'}</p>
+                                    <p class="text-xs text-slate-600 mt-1 leading-relaxed">${prof.address || 'Jl. Raya Bersih Manjur No. 88, Kota Laundry'}<br>WhatsApp / Telp: ${prof.phone || '0812-3456-7890'}</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-xl font-black tracking-wider text-navy uppercase">INVOICE / NOTA</div>
+                                <div class="text-lg font-extrabold text-primary font-mono mt-1">${trx.id}</div>
+                                <div class="inline-block mt-2 font-black uppercase text-xs px-3 py-1 rounded-full shadow-sm ${statusClass}">
+                                    STATUS: ${trx.paymentStatus || 'LUNAS'}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Panel Detail Pesanan & Pelanggan -->
+                        <div class="grid grid-cols-2 gap-6 mb-6">
+                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                                <div class="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider mb-2">Ditujukan Kepada (Pelanggan)</div>
+                                <div class="font-extrabold text-navy text-base">${trx.customerName || '-'}</div>
+                                <div class="text-xs font-semibold text-slate-600 mt-1"><i class="fa-brands fa-whatsapp text-emerald-600 mr-1"></i> ${trx.customerPhone || '-'}</div>
+                                ${trx.notes ? `<div class="mt-2 text-xs text-amber-800 bg-amber-50 p-2 rounded border border-amber-200 italic">Catatan: "${trx.notes}"</div>` : ''}
+                            </div>
+                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                                <div class="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider mb-2">Informasi & Waktu Pesanan</div>
+                                <div class="grid grid-cols-2 gap-y-1 text-xs">
+                                    <span class="text-slate-500">Tanggal Order:</span> <span class="font-bold text-slate-800 text-right font-mono">${dtStr}</span>
+                                    <span class="text-slate-500">Estimasi Selesai:</span> <span class="font-bold text-indigo-700 text-right font-mono">${estStr}</span>
+                                    <span class="text-slate-500">Kategori / SLA:</span> <span class="font-extrabold ${isExpress ? 'text-rose-600' : 'text-slate-800'} text-right">${isExpress ? '⚡ EXPRESS PRIORITAS' : '🕒 REGULER'}</span>
+                                    <span class="text-slate-500">Kasir / Petugas:</span> <span class="font-bold text-slate-800 text-right">${cashierName}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tabel Item / Layanan -->
+                        <div class="border border-slate-300 rounded-xl overflow-hidden mb-6">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-navy text-white text-xs uppercase tracking-wider">
+                                        <th class="py-3 px-3 text-center w-12 font-extrabold">No</th>
+                                        <th class="py-3 px-3 font-extrabold">Deskripsi Layanan & Treatment</th>
+                                        <th class="py-3 px-3 text-right font-extrabold w-28">Qty / Berat</th>
+                                        <th class="py-3 px-3 text-right font-extrabold w-32">Harga Satuan</th>
+                                        <th class="py-3 px-3 text-right font-extrabold w-36">Subtotal</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${itemsRowsHTML}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Ringkasan Biaya & Pembayaran -->
+                        <div class="grid grid-cols-12 gap-6 items-start">
+                            <div class="col-span-6 bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs text-slate-600 space-y-2">
+                                <div class="font-extrabold text-navy uppercase text-xs mb-1">Syarat & Ketentuan Pengambilan:</div>
+                                <ol class="list-decimal list-inside space-y-1 leading-relaxed">
+                                    <li>Pengambilan barang wajib menyertakan bukti invoice/nota resmi ini.</li>
+                                    <li>Periksa kembali jumlah dan kondisi pakaian sebelum meninggalkan loket.</li>
+                                    <li>Garansi komplain berlaku maksimal <b>2x24 jam</b> setelah barang diambil.</li>
+                                    <li>Barang yang tidak diambil lebih dari 30 hari di luar tanggung jawab kami.</li>
+                                </ol>
+                            </div>
+                            <div class="col-span-6 space-y-2 bg-slate-50 p-4 rounded-xl border border-slate-200 text-sm">
+                                <div class="flex justify-between text-slate-600">
+                                    <span>Subtotal Layanan:</span> <span class="font-bold text-slate-800 font-mono">${formatRupiah(totalSrvOnly)}</span>
+                                </div>
+                                ${trx.perfumePrice > 0 ? `<div class="flex justify-between text-slate-600"><span>Parfum Premium:</span> <span class="font-bold text-slate-800 font-mono">+${formatRupiah(trx.perfumePrice)}</span></div>` : ''}
+                                ${totalSpottingOnly > 0 ? `<div class="flex justify-between text-slate-600"><span>Treatment Spoting:</span> <span class="font-bold text-slate-800 font-mono">+${formatRupiah(totalSpottingOnly)}</span></div>` : ''}
+                                ${trx.discount > 0 ? `<div class="flex justify-between text-rose-600 font-semibold"><span>Diskon Member:</span> <span class="font-mono">-${formatRupiah(trx.discount)}</span></div>` : ''}
+                                
+                                <div class="border-t-2 border-slate-300 pt-2 flex justify-between items-center text-base font-black text-navy">
+                                    <span>TOTAL TAGIHAN:</span> <span class="font-mono text-lg text-primary">${formatRupiah(trx.totalCost)}</span>
+                                </div>
+                                <div class="flex justify-between text-xs text-slate-600 pt-1 border-t border-slate-200">
+                                    <span>Metode Pembayaran:</span> <span class="font-bold text-slate-800">${trx.paymentMethod || 'Tunai'}</span>
+                                </div>
+                                <div class="flex justify-between text-xs text-slate-600">
+                                    <span>Nominal Dibayar:</span> <span class="font-bold text-slate-800 font-mono">${formatRupiah(trx.paidAmount || 0)}</span>
+                                </div>
+                                <div class="flex justify-between text-xs font-extrabold ${change >= 0 ? 'text-emerald-700' : 'text-rose-600'}">
+                                    <span>Kembalian / Sisa:</span> <span class="font-mono">${changeStr}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Blok Tanda Tangan / Paraf -->
+                        <div class="grid grid-cols-2 gap-8 mt-10 pt-6 border-t border-slate-200 text-center text-xs">
+                            <div class="flex flex-col items-center">
+                                <span class="text-slate-500 font-medium">Tanda Terima Pelanggan</span>
+                                <div class="h-16 w-32 border-b border-dashed border-slate-400 my-2"></div>
+                                <span class="font-extrabold text-navy">(${trx.customerName || '.........................'})</span>
+                            </div>
+                            <div class="flex flex-col items-center">
+                                <span class="text-slate-500 font-medium">Hormat Kami, Kasir / Petugas</span>
+                                <div class="h-16 flex items-center justify-center my-2">
+                                    <span class="font-black text-slate-300 tracking-widest text-lg border-2 border-slate-200 px-3 py-1 rounded rotate-6 select-none uppercase">VERIFIED</span>
+                                </div>
+                                <span class="font-extrabold text-navy">(${cashierName})</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                // ================== LAYOUT THERMAL COMPACT (58mm / 80mm) ==================
+                const is58 = (size === '58mm');
+                area.innerHTML = `
+                    <div class="border-b border-dashed border-slate-800 ${is58 ? 'pb-1.5 mb-1.5' : 'pb-2.5 mb-2.5'}">
+                        <div class="flex items-center ${is58 ? 'gap-2' : 'gap-3'} text-left">
+                            <img id="print-logo-img" src="logo_manjur.png" alt="Logo Manjur Laundry" class="${is58 ? 'h-11 w-11' : 'h-14 w-14'} object-contain shrink-0 contrast-125" crossorigin="anonymous">
+                            <div class="flex-1 min-w-0">
+                                <h2 class="${is58 ? 'text-xs' : 'text-sm sm:text-base'} font-black tracking-tight uppercase leading-none text-navy">
+                                    ${prof.name || 'MANJUR LAUNDRY'}
+                                </h2>
+                                <p class="${is58 ? 'text-[8px]' : 'text-[9.5px]'} font-bold text-accent-dark tracking-wide mt-0.5 leading-tight">
+                                    ${prof.tagline || 'Bersih, Harum, Cepat, & Manjur!'}
+                                </p>
+                                <p class="${is58 ? 'text-[7.5px]' : 'text-[8.5px]'} text-slate-600 font-sans leading-tight mt-0.5">${prof.address || 'Jl. Raya Bersih Manjur No. 88, Kota Laundry'}<br>WA/Telp: ${prof.phone || '0812-3456-7890'}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="${is58 ? 'mt-1.5' : 'mt-2'} flex justify-center">
+                            ${isExpress 
+                                ? `<div class="bg-slate-900 text-white font-mono font-bold ${is58 ? 'py-0.5 px-1.5 text-[8.5px]' : 'py-1 px-2 text-[10px]'} inline-block rounded tracking-wider shadow-2xs whitespace-nowrap">⚡ EXPRESS PRIORITAS</div>`
+                                : `<div class="bg-slate-100 border border-slate-700 text-slate-800 font-mono font-bold ${is58 ? 'py-0.5 px-1.5 text-[8.5px]' : 'py-1 px-2 text-[10px]'} inline-block rounded whitespace-nowrap">🕒 LAYANAN REGULER</div>`
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Info Nota -->
+                    <div class="${is58 ? 'text-[9.2px] space-y-0.5 pb-1.5 mb-1.5' : 'text-xs space-y-1 pb-2.5 mb-2.5'} border-b border-dashed border-slate-400 font-mono">
+                        <div class="flex justify-between items-center"><span>No Nota:</span> <span class="font-bold text-slate-900 whitespace-nowrap">${trx.id}</span></div>
+                        <div class="flex justify-between items-center"><span>Tanggal:</span> <span class="whitespace-nowrap">${dtStr}</span></div>
+                        <div class="flex justify-between items-center bg-indigo-50 px-1 py-0.5 rounded -mx-1 text-indigo-950 font-bold">
+                            <span>Est.Selesai:</span> <span class="whitespace-nowrap">${estStr}</span>
+                        </div>
+                        <div class="flex justify-between items-center"><span>Kasir:</span> <span class="whitespace-nowrap text-right">${cashierName}</span></div>
+                        <div class="flex justify-between items-center border-t border-slate-200 pt-0.5 mt-0.5 font-bold text-slate-900">
+                            <span>Pelanggan:</span> <span class="whitespace-nowrap text-right">${trx.customerName || '-'}</span>
+                        </div>
+                        <div class="flex justify-between items-center ${is58 ? 'text-[8.5px]' : 'text-[11px]'} text-slate-600">
+                            <span>No HP/WA:</span> <span class="whitespace-nowrap">${trx.customerPhone || '-'}</span>
+                        </div>
+                    </div>
+
+                    <!-- Daftar Layanan / Item -->
+                    <div class="border-b border-dashed border-slate-400 ${is58 ? 'pb-1 mb-1.5' : 'pb-2 mb-2.5'} font-mono">
+                        <div class="flex justify-between font-bold ${is58 ? 'text-[9.5px] pb-0.5 mb-0.5' : 'text-xs pb-1 mb-1.5'} uppercase text-slate-700 border-b border-slate-300">
+                            <span>Layanan / Item</span>
+                            <span>Subtotal</span>
+                        </div>
+                        <div class="divide-y divide-slate-100">
+                            ${itemsRowsHTML}
+                        </div>
+                    </div>
+
+                    <!-- Ringkasan Keuangan -->
+                    <div class="${is58 ? 'text-[9.2px] space-y-0.5 pb-1.5 mb-1.5' : 'text-xs space-y-1 pb-2.5 mb-2.5'} font-mono border-b border-dashed border-slate-800">
+                        <div class="flex justify-between items-center text-slate-600"><span>Subtotal Layanan:</span> <span class="font-bold text-slate-800 whitespace-nowrap">${formatRupiah(totalSrvOnly)}</span></div>
+                        ${trx.perfumePrice > 0 ? `<div class="flex justify-between items-center text-slate-600"><span>Parfum Premium:</span> <span class="font-bold text-slate-800 whitespace-nowrap">+${formatRupiah(trx.perfumePrice)}</span></div>` : ''}
+                        ${totalSpottingOnly > 0 ? `<div class="flex justify-between items-center text-slate-600"><span>Spoting Noda:</span> <span class="font-bold text-slate-800 whitespace-nowrap">+${formatRupiah(totalSpottingOnly)}</span></div>` : ''}
+                        ${trx.discount > 0 ? `<div class="flex justify-between items-center text-rose-600 font-semibold"><span>Diskon Member:</span> <span class="whitespace-nowrap">-${formatRupiah(trx.discount)}</span></div>` : ''}
+                        
+                        <div class="bg-slate-100 border border-slate-800 ${is58 ? 'p-1 my-1 text-xs' : 'p-1.5 my-1.5 text-sm'} font-black flex justify-between items-center text-navy rounded-xs">
+                            <span>TOTAL:</span> <span class="whitespace-nowrap">${formatRupiah(trx.totalCost)}</span>
+                        </div>
+                        <div class="flex justify-between items-center ${is58 ? 'text-[8.8px]' : 'text-[11px]'}"><span>Metode Bayar:</span> <span class="font-bold whitespace-nowrap">${trx.paymentMethod || 'Tunai'}</span></div>
+                        <div class="flex justify-between items-center ${is58 ? 'text-[8.8px]' : 'text-[11px]'}"><span>Bayar / Diterima:</span> <span class="font-bold whitespace-nowrap">${formatRupiah(trx.paidAmount || 0)}</span></div>
+                        <div class="flex justify-between items-center ${is58 ? 'text-[8.8px]' : 'text-[11px]'} font-bold ${change >= 0 ? 'text-emerald-700' : 'text-rose-600'}">
+                            <span>Kembalian:</span> <span class="whitespace-nowrap">${changeStr}</span>
+                        </div>
+                        
+                        <div class="${is58 ? 'pt-1' : 'pt-2'} flex justify-center">
+                            <div class="font-black uppercase py-0.5 px-2 rounded ${is58 ? 'text-[8.5px]' : 'text-xs'} w-full text-center shadow-2xs ${statusClass}">
+                                STATUS: ${trx.paymentStatus || 'LUNAS'}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Footer Thermal -->
+                    <div class="${is58 ? 'text-[8px] space-y-1' : 'text-[10px] space-y-1.5'} text-center text-slate-600 font-sans">
+                        ${trx.notes ? `<div class="italic bg-slate-100 ${is58 ? 'p-1' : 'p-1.5'} rounded font-medium text-slate-800 border border-slate-200">Catatan: "${trx.notes}"</div>` : ''}
+                        <p class="font-bold uppercase text-slate-800 tracking-wide">--- TERIMA KASIH KUNJUNGAN ANDA ---</p>
+                        <p class="leading-tight">Periksa pakaian Anda. Garansi komplain maks <b>2x24 jam</b> disertai nota asli.</p>
+                        <div class="${is58 ? 'pt-1' : 'pt-2'} flex flex-col items-center justify-center">
+                            <div class="font-mono tracking-[0.2em] ${is58 ? 'text-[9px] py-0.5' : 'text-xs py-1'} font-black border-y border-slate-800 text-slate-800 select-none">||| | |||| || | || |||</div>
+                            <span class="${is58 ? 'text-[8px]' : 'text-[9px]'} font-mono text-slate-500 mt-0.5">*${trx.id}*</span>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
         function openReceiptPreview(trx) {
             currentReceiptTrx = trx;
             applyCompanyProfileToUI();
             const modal = document.getElementById('receipt-print-modal');
             modal.classList.remove('hidden');
-
-            document.getElementById('rc-id').innerText = trx.id;
-            document.getElementById('rc-date').innerText = new Date(trx.date).toLocaleString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-            document.getElementById('rc-cust').innerText = trx.customerName;
-            document.getElementById('rc-phone').innerText = trx.customerPhone || '-';
-            
-            const itemsBody = document.getElementById('rc-items-body');
-            let totalSrvOnly = 0;
-            let totalSpottingOnly = trx.spottingPrice || 0;
-
-            if (trx.items && trx.items.length > 0) {
-                totalSpottingOnly = trx.items.reduce((sum, i) => sum + (i.spottingPrice || 0), 0);
-                itemsBody.innerHTML = trx.items.map(item => {
-                    const itemSrvCost = item.price * item.qty;
-                    totalSrvOnly += itemSrvCost;
-                    return `
-                        <tr>
-                            <td class="py-1.5">
-                                <div class="font-bold">${item.serviceName}</div>
-                                ${item.spottingPrice > 0 ? `<div class="text-[10px] text-amber-700 italic">+ Treatment Spoting (${formatRupiah(item.spottingPrice)})</div>` : ''}
-                                ${item.notes ? `<div class="text-[9px] text-slate-500">Note: ${item.notes}</div>` : ''}
-                            </td>
-                            <td class="py-1.5 text-right">${item.qty} ${item.unit || 'Kg'}</td>
-                            <td class="py-1.5 text-right font-bold">${formatRupiah(itemSrvCost)}</td>
-                        </tr>
-                    `;
-                }).join('');
-            } else {
-                totalSrvOnly = (trx.totalCost + (trx.discount || 0)) - (trx.perfumePrice || 0) - (trx.spottingPrice || 0);
-                itemsBody.innerHTML = `
-                    <tr>
-                        <td class="py-1.5 font-bold">${trx.serviceName}</td>
-                        <td class="py-1.5 text-right">${trx.qty} ${trx.unit || 'Kg'}</td>
-                        <td class="py-1.5 text-right font-bold">${formatRupiah(totalSrvOnly)}</td>
-                    </tr>
-                `;
-            }
-
-            document.getElementById('rc-subtotal').innerText = formatRupiah(totalSrvOnly);
-
-            const perfRow = document.getElementById('rc-perfume-row');
-            if (trx.perfumePrice && trx.perfumePrice > 0) {
-                perfRow.classList.remove('hidden');
-                document.getElementById('rc-perfume').innerText = formatRupiah(trx.perfumePrice);
-            } else {
-                perfRow.classList.add('hidden');
-            }
-
-            const spottingRow = document.getElementById('rc-spotting-row');
-            if (totalSpottingOnly > 0) {
-                if (spottingRow) spottingRow.classList.remove('hidden');
-                document.getElementById('rc-spotting').innerText = formatRupiah(totalSpottingOnly);
-            } else {
-                if (spottingRow) spottingRow.classList.add('hidden');
-            }
-
-            const discRow = document.getElementById('rc-discount-row');
-            if (trx.discount && trx.discount > 0) {
-                discRow.classList.remove('hidden');
-                document.getElementById('rc-discount').innerText = `-` + formatRupiah(trx.discount);
-            } else {
-                discRow.classList.add('hidden');
-            }
-
-            document.getElementById('rc-total').innerText = formatRupiah(trx.totalCost);
-            document.getElementById('rc-method').innerText = trx.paymentMethod || 'Tunai';
-            document.getElementById('rc-paid').innerText = formatRupiah(trx.paidAmount || 0);
-
-            const change = (trx.paidAmount || 0) - trx.totalCost;
-            document.getElementById('rc-change').innerText = change >= 0 ? formatRupiah(change) : '0 (Belum Lunas)';
-
-            const badge = document.getElementById('rc-status-badge');
-            badge.innerText = trx.paymentStatus;
-            badge.className = `font-bold uppercase px-1.5 py-0.5 rounded text-[10px] ${trx.paymentStatus === 'Lunas' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}`;
-
-            const notesBox = document.getElementById('rc-notes-box');
-            if (trx.notes) {
-                notesBox.classList.remove('hidden');
-                notesBox.innerText = `Catatan: "${trx.notes}"`;
-            } else {
-                notesBox.classList.add('hidden');
-            }
-
-            setPrintSize(appState.printSize);
+            renderReceiptDOM(trx, appState.printSize || '58mm');
         }
 
         function closeReceiptModal() {
@@ -3449,14 +3728,20 @@
         function setPrintSize(size) {
             appState.printSize = size;
             const area = document.getElementById('receipt-print-area');
-            area.classList.remove('print-58mm', 'print-80mm', 'print-a4');
-            area.classList.add(`print-${size}`);
+            if (area) {
+                area.classList.remove('print-58mm', 'print-80mm', 'print-a4');
+                area.classList.add(`print-${size}`);
+            }
 
             document.querySelectorAll('.size-btn').forEach(btn => {
                 btn.className = "size-btn bg-white border border-slate-300 text-slate-700 hover:border-primary font-bold px-3 py-1.5 rounded-lg";
             });
             const activeBtn = document.getElementById(`btn-size-${size}`);
             if (activeBtn) activeBtn.className = "size-btn bg-primary text-white font-bold px-3 py-1.5 rounded-lg shadow-sm";
+
+            if (currentReceiptTrx) {
+                renderReceiptDOM(currentReceiptTrx, size);
+            }
         }
 
         function sendWaReceipt() {
@@ -3693,10 +3978,12 @@
                     const divider = "-".repeat(width) + "\n";
 
                     const padLine = (leftText, rightText) => {
-                        const lStr = String(leftText || '');
-                        const rStr = String(rightText || '');
+                        const lStr = String(leftText || '').trim();
+                        const rStr = String(rightText || '').trim();
                         const spaces = width - lStr.length - rStr.length;
-                        if (spaces <= 0) return (lStr + " " + rStr).substring(0, width) + "\n";
+                        if (spaces <= 0) {
+                            return lStr + "\n" + " ".repeat(Math.max(0, width - rStr.length)) + rStr + "\n";
+                        }
                         return lStr + " ".repeat(spaces) + rStr + "\n";
                     };
 
@@ -3729,20 +4016,36 @@
                     if (prof.tagline) commands.push(enc.encode(prof.tagline + "\n"));
                     if (prof.address) commands.push(enc.encode(prof.address + "\n"));
                     if (prof.phone) commands.push(enc.encode("WA / Telp: " + prof.phone + "\n"));
+                    
+                    const isExpress = trx.isExpress || (trx.serviceName || '').toLowerCase().includes('express') || (trx.serviceName || '').toLowerCase().includes('6 jam');
+                    commands.push(enc.encode("\n"));
+                    commands.push(new Uint8Array([0x1B, 0x45, 0x01]));
+                    if (isExpress) {
+                        commands.push(enc.encode("[ LAYANAN EXPRESS PRIORITAS ]\n"));
+                    } else {
+                        commands.push(enc.encode("[ LAYANAN REGULER / STANDAR ]\n"));
+                    }
+                    commands.push(new Uint8Array([0x1B, 0x45, 0x00]));
                     commands.push(enc.encode(divider));
 
                     // Left alignment (ESC a 0)
                     commands.push(new Uint8Array([0x1B, 0x61, 0x00]));
                     commands.push(enc.encode(padLine("No Nota:", trx.id || '-')));
                     const dtStr = new Date(trx.date || Date.now()).toLocaleString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+                    const estStr = getEstimatedFinishDate(trx);
                     commands.push(enc.encode(padLine("Tanggal:", dtStr)));
+                    commands.push(new Uint8Array([0x1B, 0x45, 0x01]));
+                    commands.push(enc.encode(padLine("Est.Selesai:", estStr)));
+                    commands.push(new Uint8Array([0x1B, 0x45, 0x00]));
                     commands.push(enc.encode(padLine("Kasir:", appState.currentUser?.name || 'Kasir Manjur')));
                     commands.push(enc.encode(padLine("Pelanggan:", trx.customerName || '-')));
                     commands.push(enc.encode(padLine("No HP/WA:", trx.customerPhone || '-')));
                     commands.push(enc.encode(divider));
 
                     // Header Tabel
+                    commands.push(new Uint8Array([0x1B, 0x45, 0x01]));
                     commands.push(enc.encode(padLine("Layanan / Item", "Subtotal")));
+                    commands.push(new Uint8Array([0x1B, 0x45, 0x00]));
                     commands.push(enc.encode(divider));
 
                     let totalSrvOnly = 0;
@@ -3789,14 +4092,18 @@
 
                     // Total Tagihan Bold
                     commands.push(new Uint8Array([0x1B, 0x45, 0x01])); // Bold ON
-                    commands.push(enc.encode(padLine("TOTAL TAGIHAN:", formatRupiah(trx.totalCost))));
+                    commands.push(new Uint8Array([0x1D, 0x21, 0x01])); // Height double for total
+                    commands.push(enc.encode(padLine("TOTAL:", formatRupiah(trx.totalCost))));
+                    commands.push(new Uint8Array([0x1D, 0x21, 0x00])); // Reset size
                     commands.push(new Uint8Array([0x1B, 0x45, 0x00])); // Bold OFF
 
                     commands.push(enc.encode(padLine("Metode Bayar:", trx.paymentMethod || 'Tunai')));
                     commands.push(enc.encode(padLine("Bayar / Diterima:", formatRupiah(trx.paidAmount || 0))));
                     const change = (trx.paidAmount || 0) - trx.totalCost;
                     commands.push(enc.encode(padLine("Kembalian:", change >= 0 ? formatRupiah(change) : 'Rp 0')));
-                    commands.push(enc.encode(padLine("Status Bayar:", (trx.paymentStatus || 'LUNAS').toUpperCase())));
+                    commands.push(new Uint8Array([0x1B, 0x45, 0x01]));
+                    commands.push(enc.encode(padLine("STATUS BAYAR:", (trx.paymentStatus || 'LUNAS').toUpperCase())));
+                    commands.push(new Uint8Array([0x1B, 0x45, 0x00]));
                     commands.push(enc.encode(divider));
 
                     if (trx.notes) {
@@ -3810,6 +4117,7 @@
                     commands.push(enc.encode("Periksa kembali pakaian Anda.\n"));
                     commands.push(enc.encode("Komplain max 2x24jam nota asli\n\n"));
                     commands.push(enc.encode("||| | |||| || | || |||\n"));
+                    commands.push(enc.encode(`*${trx.id}*\n`));
 
                     // Feed paper 5 lines
                     commands.push(enc.encode("\n\n\n\n\n"));

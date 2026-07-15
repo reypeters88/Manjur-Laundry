@@ -210,8 +210,11 @@ function updateTransactionFull(payload) {
 function saveTransaction(payload) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getSheetByName('Transactions');
-  
-  var id = payload.id || 'TRX-' + Date.now();
+  var now = payload.date ? new Date(payload.date) : new Date();
+  var day = ('0' + now.getDate()).slice(-2);
+  var month = ('0' + (now.getMonth() + 1)).slice(-2);
+  var year = now.getFullYear().toString().slice(-2);
+  var id = payload.id || 'MJL-' + day + month + year + '-' + ('00' + (Math.floor(Math.random() * 900) + 1)).slice(-3);
   var rowData = [
     id,
     payload.customerId || '',
