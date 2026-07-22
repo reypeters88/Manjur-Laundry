@@ -23,18 +23,31 @@ function include(filename) {
 }
 
 /**
- * Setup Awal: Otomatis membuat 6 Sheet yang dibutuhkan jika belum ada
+ * Format tanggal ke format DD-MM-YY untuk Kolom A di Google Spreadsheet
+ */
+function formatDateDDMMYY(dateInput) {
+  if (!dateInput) dateInput = new Date();
+  var d = new Date(dateInput);
+  if (isNaN(d.getTime())) d = new Date();
+  var day = ('0' + d.getDate()).slice(-2);
+  var month = ('0' + (d.getMonth() + 1)).slice(-2);
+  var year = d.getFullYear().toString().slice(-2);
+  return day + '-' + month + '-' + year;
+}
+
+/**
+ * Setup Awal: Otomatis membuat 6 Sheet yang dibutuhkan jika belum ada (Kolom A = Tanggal DD-MM-YY)
  */
 function setupSpreadsheet() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   
   var sheets = {
-    'Users': ['id', 'name', 'username', 'password', 'role'],
-    'Customers': ['id', 'name', 'phone', 'address', 'membership', 'total_weight'],
-    'Services': ['id', 'name', 'price', 'unit', 'icon', 'category'],
-    'Transactions': ['id', 'customerId', 'customerName', 'serviceId', 'serviceName', 'qty', 'isExpress', 'discount', 'totalCost', 'paidAmount', 'status', 'paymentStatus', 'paymentMethod', 'date', 'notes', 'perfumePrice', 'spottingPrice', 'items'],
-    'Inventory': ['id', 'itemName', 'category', 'stock', 'unit', 'minStock', 'unitPrice', 'lastRestock'],
-    'Finances': ['id', 'type', 'category', 'description', 'amount', 'date']
+    'Users': ['Tanggal (DD-MM-YY)', 'id', 'name', 'username', 'password', 'role'],
+    'Customers': ['Tanggal (DD-MM-YY)', 'id', 'name', 'phone', 'address', 'membership', 'total_weight'],
+    'Services': ['Tanggal (DD-MM-YY)', 'id', 'name', 'price', 'unit', 'icon', 'category'],
+    'Transactions': ['Tanggal (DD-MM-YY)', 'id', 'customerId', 'customerName', 'serviceId', 'serviceName', 'qty', 'isExpress', 'discount', 'totalCost', 'paidAmount', 'status', 'paymentStatus', 'paymentMethod', 'date', 'notes', 'perfumePrice', 'spottingPrice', 'items'],
+    'Inventory': ['Tanggal (DD-MM-YY)', 'id', 'itemName', 'category', 'stock', 'unit', 'minStock', 'unitPrice', 'lastRestock'],
+    'Finances': ['Tanggal (DD-MM-YY)', 'id', 'type', 'category', 'description', 'amount', 'date']
   };
   
   for (var sheetName in sheets) {
@@ -44,19 +57,20 @@ function setupSpreadsheet() {
       sheet.appendRow(sheets[sheetName]);
       sheet.getRange(1, 1, 1, sheets[sheetName].length).setFontWeight('bold').setBackground('#0284c7').setFontColor('#ffffff');
       
+      var tgl = formatDateDDMMYY(new Date());
       // Jika sheet Services baru dibuat, isi data default
       if (sheetName === 'Services') {
-        sheet.appendRow(['srv-1', 'Cuci Kiloan Reguler (2 Hari)', 7000, 'Kg', 'fa-shirt', 'Kiloan']);
-        sheet.appendRow(['srv-2', 'Cuci Kiloan Express (6 Jam)', 12000, 'Kg', 'fa-bolt', 'Express']);
-        sheet.appendRow(['srv-3', 'Setrika Saja (Kiloan)', 5000, 'Kg', 'fa-iron', 'Kiloan']);
-        sheet.appendRow(['srv-4', 'Cuci Satuan Jas / Kemeja', 20000, 'Pcs', 'fa-user-tie', 'Satuan']);
-        sheet.appendRow(['srv-5', 'Cuci Bedcover Besar', 35000, 'Pcs', 'fa-bed', 'Satuan']);
-        sheet.appendRow(['srv-6', 'Cuci Karpet Permadani', 15000, 'Meter', 'fa-scroll', 'Karpet']);
+        sheet.appendRow([tgl, 'srv-1', 'Cuci Kiloan Reguler (2 Hari)', 7000, 'Kg', 'fa-shirt', 'Kiloan']);
+        sheet.appendRow([tgl, 'srv-2', 'Cuci Kiloan Express (6 Jam)', 12000, 'Kg', 'fa-bolt', 'Express']);
+        sheet.appendRow([tgl, 'srv-3', 'Setrika Saja (Kiloan)', 5000, 'Kg', 'fa-iron', 'Kiloan']);
+        sheet.appendRow([tgl, 'srv-4', 'Cuci Satuan Jas / Kemeja', 20000, 'Pcs', 'fa-user-tie', 'Satuan']);
+        sheet.appendRow([tgl, 'srv-5', 'Cuci Bedcover Besar', 35000, 'Pcs', 'fa-bed', 'Satuan']);
+        sheet.appendRow([tgl, 'srv-6', 'Cuci Karpet Permadani', 15000, 'Meter', 'fa-scroll', 'Karpet']);
       }
       if (sheetName === 'Users') {
-        sheet.appendRow(['USR-01', 'Pak Manjur (Owner)', 'owner', 'admin123', 'Owner']);
-        sheet.appendRow(['USR-02', 'Mbak Dewi (Kasir)', 'kasir', 'kasir123', 'Kasir']);
-        sheet.appendRow(['USR-03', 'Mas Joko (Produksi)', 'produksi', 'prod123', 'Produksi']);
+        sheet.appendRow([tgl, 'USR-01', 'Pak Manjur (Owner)', 'owner', 'admin123', 'Owner']);
+        sheet.appendRow([tgl, 'USR-02', 'Mbak Dewi (Kasir)', 'kasir', 'kasir123', 'Kasir']);
+        sheet.appendRow([tgl, 'USR-03', 'Mas Joko (Produksi)', 'produksi', 'prod123', 'Produksi']);
       }
     }
   }
@@ -106,22 +120,32 @@ function saveService(payload) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getSheetByName('Services');
   var data = sheet.getDataRange().getValues();
+  var headers = data.length > 0 ? data[0] : [];
+  var idCol = headers.indexOf('id');
+  if (idCol === -1) idCol = 0;
+  var nameCol = headers.indexOf('name');
+  var priceCol = headers.indexOf('price');
+  var unitCol = headers.indexOf('unit');
+  var iconCol = headers.indexOf('icon');
+  var catCol = headers.indexOf('category');
   
   if (payload.id && String(payload.id).startsWith('srv-')) {
     for (var i = 1; i < data.length; i++) {
-      if (String(data[i][0]) === String(payload.id)) {
-        sheet.getRange(i + 1, 2).setValue(payload.name);
-        sheet.getRange(i + 1, 3).setValue(payload.price);
-        sheet.getRange(i + 1, 4).setValue(payload.unit);
-        if (payload.icon) sheet.getRange(i + 1, 5).setValue(payload.icon);
-        if (payload.category) sheet.getRange(i + 1, 6).setValue(payload.category);
+      if (String(data[i][idCol]) === String(payload.id)) {
+        if (nameCol !== -1 && payload.name) sheet.getRange(i + 1, nameCol + 1).setValue(payload.name);
+        if (priceCol !== -1 && payload.price !== undefined) sheet.getRange(i + 1, priceCol + 1).setValue(payload.price);
+        if (unitCol !== -1 && payload.unit) sheet.getRange(i + 1, unitCol + 1).setValue(payload.unit);
+        if (iconCol !== -1 && payload.icon) sheet.getRange(i + 1, iconCol + 1).setValue(payload.icon);
+        if (catCol !== -1 && payload.category) sheet.getRange(i + 1, catCol + 1).setValue(payload.category);
         return { success: true, id: payload.id };
       }
     }
   }
   
   var newId = payload.id || 'srv-' + Date.now();
+  var tgl = formatDateDDMMYY(new Date());
   sheet.appendRow([
+    tgl,
     newId,
     payload.name || '',
     payload.price || 0,
@@ -136,8 +160,11 @@ function deleteService(serviceId) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getSheetByName('Services');
   var data = sheet.getDataRange().getValues();
+  var headers = data.length > 0 ? data[0] : [];
+  var idCol = headers.indexOf('id');
+  if (idCol === -1) idCol = 0;
   for (var i = 1; i < data.length; i++) {
-    if (String(data[i][0]) === String(serviceId)) {
+    if (String(data[i][idCol]) === String(serviceId)) {
       sheet.deleteRow(i + 1);
       break;
     }
@@ -152,15 +179,24 @@ function updateInventoryItem(payload) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getSheetByName('Inventory');
   var data = sheet.getDataRange().getValues();
+  var headers = data.length > 0 ? data[0] : [];
+  var idCol = headers.indexOf('id');
+  if (idCol === -1) idCol = 0;
+  var nameCol = headers.indexOf('itemName');
+  var catCol = headers.indexOf('category');
+  var stockCol = headers.indexOf('stock');
+  var unitCol = headers.indexOf('unit');
+  var minCol = headers.indexOf('minStock');
+  var priceCol = headers.indexOf('unitPrice');
   
   for (var i = 1; i < data.length; i++) {
-    if (String(data[i][0]) === String(payload.id)) {
-      if (payload.itemName) sheet.getRange(i + 1, 2).setValue(payload.itemName);
-      if (payload.category) sheet.getRange(i + 1, 3).setValue(payload.category);
-      if (payload.stock !== undefined) sheet.getRange(i + 1, 4).setValue(payload.stock);
-      if (payload.unit) sheet.getRange(i + 1, 5).setValue(payload.unit);
-      if (payload.minStock !== undefined) sheet.getRange(i + 1, 6).setValue(payload.minStock);
-      if (payload.unitPrice !== undefined) sheet.getRange(i + 1, 7).setValue(payload.unitPrice);
+    if (String(data[i][idCol]) === String(payload.id)) {
+      if (nameCol !== -1 && payload.itemName) sheet.getRange(i + 1, nameCol + 1).setValue(payload.itemName);
+      if (catCol !== -1 && payload.category) sheet.getRange(i + 1, catCol + 1).setValue(payload.category);
+      if (stockCol !== -1 && payload.stock !== undefined) sheet.getRange(i + 1, stockCol + 1).setValue(payload.stock);
+      if (unitCol !== -1 && payload.unit) sheet.getRange(i + 1, unitCol + 1).setValue(payload.unit);
+      if (minCol !== -1 && payload.minStock !== undefined) sheet.getRange(i + 1, minCol + 1).setValue(payload.minStock);
+      if (priceCol !== -1 && payload.unitPrice !== undefined) sheet.getRange(i + 1, priceCol + 1).setValue(payload.unitPrice);
       break;
     }
   }
@@ -171,8 +207,11 @@ function deleteInventoryItem(itemId) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getSheetByName('Inventory');
   var data = sheet.getDataRange().getValues();
+  var headers = data.length > 0 ? data[0] : [];
+  var idCol = headers.indexOf('id');
+  if (idCol === -1) idCol = 0;
   for (var i = 1; i < data.length; i++) {
-    if (String(data[i][0]) === String(itemId)) {
+    if (String(data[i][idCol]) === String(itemId)) {
       sheet.deleteRow(i + 1);
       break;
     }
@@ -187,17 +226,28 @@ function updateTransactionFull(payload) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getSheetByName('Transactions');
   var data = sheet.getDataRange().getValues();
+  var headers = data.length > 0 ? data[0] : [];
+  var idCol = headers.indexOf('id');
+  if (idCol === -1) idCol = 0;
+  var custCol = headers.indexOf('customerName');
+  var servCol = headers.indexOf('serviceName');
+  var qtyCol = headers.indexOf('qty');
+  var totalCol = headers.indexOf('totalCost');
+  var paidCol = headers.indexOf('paidAmount');
+  var statusCol = headers.indexOf('status');
+  var payStatusCol = headers.indexOf('paymentStatus');
+  var notesCol = headers.indexOf('notes');
   
   for (var i = 1; i < data.length; i++) {
-    if (String(data[i][0]) === String(payload.id)) {
-      if (payload.customerName) sheet.getRange(i + 1, 3).setValue(payload.customerName);
-      if (payload.serviceName) sheet.getRange(i + 1, 5).setValue(payload.serviceName);
-      if (payload.qty !== undefined) sheet.getRange(i + 1, 6).setValue(payload.qty);
-      if (payload.totalCost !== undefined) sheet.getRange(i + 1, 9).setValue(payload.totalCost);
-      if (payload.paidAmount !== undefined) sheet.getRange(i + 1, 10).setValue(payload.paidAmount);
-      if (payload.status) sheet.getRange(i + 1, 11).setValue(payload.status);
-      if (payload.paymentStatus) sheet.getRange(i + 1, 12).setValue(payload.paymentStatus);
-      if (payload.notes !== undefined) sheet.getRange(i + 1, 15).setValue(payload.notes);
+    if (String(data[i][idCol]) === String(payload.id)) {
+      if (custCol !== -1 && payload.customerName) sheet.getRange(i + 1, custCol + 1).setValue(payload.customerName);
+      if (servCol !== -1 && payload.serviceName) sheet.getRange(i + 1, servCol + 1).setValue(payload.serviceName);
+      if (qtyCol !== -1 && payload.qty !== undefined) sheet.getRange(i + 1, qtyCol + 1).setValue(payload.qty);
+      if (totalCol !== -1 && payload.totalCost !== undefined) sheet.getRange(i + 1, totalCol + 1).setValue(payload.totalCost);
+      if (paidCol !== -1 && payload.paidAmount !== undefined) sheet.getRange(i + 1, paidCol + 1).setValue(payload.paidAmount);
+      if (statusCol !== -1 && payload.status) sheet.getRange(i + 1, statusCol + 1).setValue(payload.status);
+      if (payStatusCol !== -1 && payload.paymentStatus) sheet.getRange(i + 1, payStatusCol + 1).setValue(payload.paymentStatus);
+      if (notesCol !== -1 && payload.notes !== undefined) sheet.getRange(i + 1, notesCol + 1).setValue(payload.notes);
       break;
     }
   }
@@ -205,7 +255,7 @@ function updateTransactionFull(payload) {
 }
 
 /**
- * Simpan Transaksi Baru
+ * Simpan Transaksi Baru (Kolom A diawali dengan Tanggal DD-MM-YY)
  */
 function saveTransaction(payload) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -215,7 +265,9 @@ function saveTransaction(payload) {
   var month = ('0' + (now.getMonth() + 1)).slice(-2);
   var year = now.getFullYear().toString().slice(-2);
   var id = payload.id || 'MJL-' + day + month + year + '-' + ('00' + (Math.floor(Math.random() * 900) + 1)).slice(-3);
+  var tgl = formatDateDDMMYY(now);
   var rowData = [
+    tgl,
     id,
     payload.customerId || '',
     payload.customerName || '',
@@ -230,7 +282,10 @@ function saveTransaction(payload) {
     payload.paymentStatus || 'Belum Lunas',
     payload.paymentMethod || 'Tunai',
     payload.date || new Date().toISOString(),
-    payload.notes || ''
+    payload.notes || '',
+    payload.perfumePrice || 0,
+    payload.spottingPrice || 0,
+    JSON.stringify(payload.items || [])
   ];
   
   sheet.appendRow(rowData);
@@ -259,12 +314,18 @@ function updateOrderStatus(payload) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getSheetByName('Transactions');
   var data = sheet.getDataRange().getValues();
+  var headers = data.length > 0 ? data[0] : [];
+  var idCol = headers.indexOf('id');
+  if (idCol === -1) idCol = 0;
+  var statusCol = headers.indexOf('status');
+  var payStatusCol = headers.indexOf('paymentStatus');
+  var paidCol = headers.indexOf('paidAmount');
   
   for (var i = 1; i < data.length; i++) {
-    if (String(data[i][0]) === String(payload.id)) {
-      if (payload.status) sheet.getRange(i + 1, 11).setValue(payload.status);
-      if (payload.paymentStatus) sheet.getRange(i + 1, 12).setValue(payload.paymentStatus);
-      if (payload.paidAmount !== undefined) sheet.getRange(i + 1, 10).setValue(payload.paidAmount);
+    if (String(data[i][idCol]) === String(payload.id)) {
+      if (statusCol !== -1 && payload.status) sheet.getRange(i + 1, statusCol + 1).setValue(payload.status);
+      if (payStatusCol !== -1 && payload.paymentStatus) sheet.getRange(i + 1, payStatusCol + 1).setValue(payload.paymentStatus);
+      if (paidCol !== -1 && payload.paidAmount !== undefined) sheet.getRange(i + 1, paidCol + 1).setValue(payload.paidAmount);
       break;
     }
   }
@@ -278,18 +339,26 @@ function updateCustomerWeight(customerId, addWeight) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getSheetByName('Customers');
   var data = sheet.getDataRange().getValues();
+  var headers = data.length > 0 ? data[0] : [];
+  var idCol = headers.indexOf('id');
+  if (idCol === -1) idCol = 0;
+  var weightCol = headers.indexOf('total_weight');
+  var memberCol = headers.indexOf('membership');
   
   for (var i = 1; i < data.length; i++) {
-    if (String(data[i][0]) === String(customerId)) {
-      var currentWeight = parseFloat(data[i][5]) || 0;
-      var newWeight = currentWeight + addWeight;
-      sheet.getRange(i + 1, 6).setValue(newWeight);
-      
-      var newMember = 'Reguler';
-      if (newWeight >= 50) newMember = 'Gold Member';
-      else if (newWeight >= 20) newMember = 'Silver Member';
-      
-      sheet.getRange(i + 1, 5).setValue(newMember);
+    if (String(data[i][idCol]) === String(customerId)) {
+      if (weightCol !== -1) {
+        var currentWeight = parseFloat(data[i][weightCol]) || 0;
+        var newWeight = currentWeight + addWeight;
+        sheet.getRange(i + 1, weightCol + 1).setValue(newWeight);
+        
+        if (memberCol !== -1) {
+          var newMember = 'Reguler';
+          if (newWeight >= 50) newMember = 'Gold Member';
+          else if (newWeight >= 20) newMember = 'Silver Member';
+          sheet.getRange(i + 1, memberCol + 1).setValue(newMember);
+        }
+      }
       break;
     }
   }
@@ -302,22 +371,31 @@ function restockItem(payload) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getSheetByName('Inventory');
   var data = sheet.getDataRange().getValues();
+  var headers = data.length > 0 ? data[0] : [];
+  var idCol = headers.indexOf('id');
+  if (idCol === -1) idCol = 0;
+  var stockCol = headers.indexOf('stock');
+  var restockCol = headers.indexOf('lastRestock');
   
   var restockQty = parseFloat(payload.addQty) || 0;
   var totalCost = parseFloat(payload.totalCost) || 0;
   var dateStr = payload.date || new Date().toISOString();
   
   for (var i = 1; i < data.length; i++) {
-    if (String(data[i][0]) === String(payload.id)) {
-      var currentStock = parseFloat(data[i][3]) || 0;
-      sheet.getRange(i + 1, 4).setValue(currentStock + restockQty);
-      sheet.getRange(i + 1, 8).setValue(dateStr);
+    if (String(data[i][idCol]) === String(payload.id)) {
+      if (stockCol !== -1) {
+        var currentStock = parseFloat(data[i][stockCol]) || 0;
+        sheet.getRange(i + 1, stockCol + 1).setValue(currentStock + restockQty);
+      }
+      if (restockCol !== -1) {
+        sheet.getRange(i + 1, restockCol + 1).setValue(dateStr);
+      }
       
       if (totalCost > 0) {
         addFinanceRecord({
           type: 'Pengeluaran',
           category: 'Restock Bahan',
-          description: 'Restock ' + data[i][1] + ' sebanyak ' + restockQty + ' ' + data[i][4],
+          description: 'Restock ' + data[i][idCol === 0 ? 1 : idCol + 1] + ' sebanyak ' + restockQty + ' ' + (headers.indexOf('unit') !== -1 ? data[i][headers.indexOf('unit')] : ''),
           amount: totalCost,
           date: dateStr
         });
@@ -333,7 +411,9 @@ function addFinanceRecord(payload) {
   var sheet = ss.getSheetByName('Finances');
   
   var id = 'FIN-' + Date.now() + Math.floor(Math.random()*100);
+  var tgl = formatDateDDMMYY(payload.date || new Date());
   sheet.appendRow([
+    tgl,
     id,
     payload.type || 'Pemasukan',
     payload.category || 'Umum',
@@ -348,20 +428,28 @@ function saveCustomer(payload) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getSheetByName('Customers');
   var data = sheet.getDataRange().getValues();
+  var headers = data.length > 0 ? data[0] : [];
+  var idCol = headers.indexOf('id');
+  if (idCol === -1) idCol = 0;
+  var nameCol = headers.indexOf('name');
+  var phoneCol = headers.indexOf('phone');
+  var addrCol = headers.indexOf('address');
   
   if (payload.id) {
     for (var i = 1; i < data.length; i++) {
-      if (String(data[i][0]) === String(payload.id)) {
-        sheet.getRange(i + 1, 2).setValue(payload.name);
-        sheet.getRange(i + 1, 3).setValue(payload.phone);
-        sheet.getRange(i + 1, 4).setValue(payload.address);
+      if (String(data[i][idCol]) === String(payload.id)) {
+        if (nameCol !== -1 && payload.name) sheet.getRange(i + 1, nameCol + 1).setValue(payload.name);
+        if (phoneCol !== -1 && payload.phone) sheet.getRange(i + 1, phoneCol + 1).setValue(payload.phone);
+        if (addrCol !== -1 && payload.address) sheet.getRange(i + 1, addrCol + 1).setValue(payload.address);
         return { success: true, id: payload.id };
       }
     }
   }
   
   var newId = 'CUST-' + Date.now();
+  var tgl = formatDateDDMMYY(new Date());
   sheet.appendRow([
+    tgl,
     newId,
     payload.name || '',
     payload.phone || '',
@@ -376,21 +464,30 @@ function saveUser(payload) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getSheetByName('Users');
   var data = sheet.getDataRange().getValues();
+  var headers = data.length > 0 ? data[0] : [];
+  var idCol = headers.indexOf('id');
+  if (idCol === -1) idCol = 0;
+  var nameCol = headers.indexOf('name');
+  var userCol = headers.indexOf('username');
+  var passCol = headers.indexOf('password');
+  var roleCol = headers.indexOf('role');
   
   if (payload.id && String(payload.id).startsWith('USR-')) {
     for (var i = 1; i < data.length; i++) {
-      if (String(data[i][0]) === String(payload.id)) {
-        if (payload.name) sheet.getRange(i + 1, 2).setValue(payload.name);
-        if (payload.username) sheet.getRange(i + 1, 3).setValue(payload.username);
-        if (payload.password) sheet.getRange(i + 1, 4).setValue(payload.password);
-        if (payload.role) sheet.getRange(i + 1, 5).setValue(payload.role);
+      if (String(data[i][idCol]) === String(payload.id)) {
+        if (nameCol !== -1 && payload.name) sheet.getRange(i + 1, nameCol + 1).setValue(payload.name);
+        if (userCol !== -1 && payload.username) sheet.getRange(i + 1, userCol + 1).setValue(payload.username);
+        if (passCol !== -1 && payload.password) sheet.getRange(i + 1, passCol + 1).setValue(payload.password);
+        if (roleCol !== -1 && payload.role) sheet.getRange(i + 1, roleCol + 1).setValue(payload.role);
         return { success: true, id: payload.id };
       }
     }
   }
 
   var newId = payload.id || 'USR-' + Date.now();
+  var tgl = formatDateDDMMYY(new Date());
   sheet.appendRow([
+    tgl,
     newId,
     payload.name || '',
     payload.username || '',
@@ -404,8 +501,11 @@ function deleteUser(userId) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getSheetByName('Users');
   var data = sheet.getDataRange().getValues();
+  var headers = data.length > 0 ? data[0] : [];
+  var idCol = headers.indexOf('id');
+  if (idCol === -1) idCol = 0;
   for (var i = 1; i < data.length; i++) {
-    if (String(data[i][0]) === String(userId)) {
+    if (String(data[i][idCol]) === String(userId)) {
       sheet.deleteRow(i + 1);
       break;
     }
@@ -462,12 +562,12 @@ function syncAllDataToSpreadsheet(data) {
   setupSpreadsheet();
   
   var mappings = [
-    { key: 'users', sheetName: 'Users', headers: ['id', 'name', 'username', 'password', 'role'] },
-    { key: 'customers', sheetName: 'Customers', headers: ['id', 'name', 'phone', 'address', 'membership', 'total_weight'] },
-    { key: 'services', sheetName: 'Services', headers: ['id', 'name', 'price', 'unit', 'icon', 'category'] },
-    { key: 'transactions', sheetName: 'Transactions', headers: ['id', 'customerId', 'customerName', 'serviceId', 'serviceName', 'qty', 'isExpress', 'discount', 'totalCost', 'paidAmount', 'status', 'paymentStatus', 'paymentMethod', 'date', 'notes', 'perfumePrice', 'spottingPrice', 'items'] },
-    { key: 'inventory', sheetName: 'Inventory', headers: ['id', 'itemName', 'category', 'stock', 'unit', 'minStock', 'unitPrice', 'lastRestock'] },
-    { key: 'finances', sheetName: 'Finances', headers: ['id', 'type', 'category', 'description', 'amount', 'date'] }
+    { key: 'users', sheetName: 'Users', headers: ['Tanggal (DD-MM-YY)', 'id', 'name', 'username', 'password', 'role'] },
+    { key: 'customers', sheetName: 'Customers', headers: ['Tanggal (DD-MM-YY)', 'id', 'name', 'phone', 'address', 'membership', 'total_weight'] },
+    { key: 'services', sheetName: 'Services', headers: ['Tanggal (DD-MM-YY)', 'id', 'name', 'price', 'unit', 'icon', 'category'] },
+    { key: 'transactions', sheetName: 'Transactions', headers: ['Tanggal (DD-MM-YY)', 'id', 'customerId', 'customerName', 'serviceId', 'serviceName', 'qty', 'isExpress', 'discount', 'totalCost', 'paidAmount', 'status', 'paymentStatus', 'paymentMethod', 'date', 'notes', 'perfumePrice', 'spottingPrice', 'items'] },
+    { key: 'inventory', sheetName: 'Inventory', headers: ['Tanggal (DD-MM-YY)', 'id', 'itemName', 'category', 'stock', 'unit', 'minStock', 'unitPrice', 'lastRestock'] },
+    { key: 'finances', sheetName: 'Finances', headers: ['Tanggal (DD-MM-YY)', 'id', 'type', 'category', 'description', 'amount', 'date'] }
   ];
   
   var updatedCounts = {};
@@ -486,15 +586,19 @@ function syncAllDataToSpreadsheet(data) {
           var row = [];
           for (var h = 0; h < map.headers.length; h++) {
             var field = map.headers[h];
-            var val = item[field];
-            if (val !== undefined && val !== null) {
-              if (typeof val === 'object') {
-                row.push(JSON.stringify(val));
-              } else {
-                row.push(val);
-              }
+            if (field === 'Tanggal (DD-MM-YY)') {
+              row.push(formatDateDDMMYY(item.date || item.lastRestock || new Date()));
             } else {
-              row.push('');
+              var val = item[field];
+              if (val !== undefined && val !== null) {
+                if (typeof val === 'object') {
+                  row.push(JSON.stringify(val));
+                } else {
+                  row.push(val);
+                }
+              } else {
+                row.push('');
+              }
             }
           }
           rows.push(row);

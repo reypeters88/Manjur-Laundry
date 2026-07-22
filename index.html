@@ -1,6 +1,12 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
+    <script>
+    window.onerror = function(msg, url, line, col, error) {
+        alert("JavaScript Error:\n" + msg + "\nLine: " + line + "\nCol: " + col);
+        return false;
+    };
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manjur Laundry - Sistem Kas & Manajemen Keuangan</title>
@@ -52,6 +58,9 @@
     
     <!-- SheetJS (Excel Export) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <!-- html2pdf (PDF Export) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     
     <!-- Google Fonts: Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -1010,7 +1019,7 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 <!-- Card 1: Layanan & Harga -->
                 <button onclick="showTab('services')" class="bg-white hover:bg-slate-50 border border-slate-200/80 hover:border-primary/50 rounded-2xl p-6 shadow-card hover:shadow-lg transition text-left group flex flex-col justify-between">
                     <div>
@@ -1055,8 +1064,220 @@
                         <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
                     </div>
                 </button>
+                <!-- Card 4: Gaji Karyawan -->
+                <button onclick="showTab('gaji')" class="bg-white hover:bg-slate-50 border border-slate-200/80 hover:border-primary/50 rounded-2xl p-6 shadow-card hover:shadow-lg transition text-left group flex flex-col justify-between">
+                    <div>
+                        <div class="w-14 h-14 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-users"></i>
+                        </div>
+                        <h3 class="text-lg font-black text-navy group-hover:text-primary transition">Gaji Karyawan</h3>
+                        <p class="text-xs text-slate-400 font-medium mt-1 leading-relaxed">Kelola dan hitung gaji otomatis, lembur, dan komisi staf.</p>
+                    </div>
+                    <div class="mt-6 flex items-center justify-between text-xs font-bold text-primary pt-4 border-t border-slate-100">
+                        <span>Buka Gaji Karyawan</span>
+                        <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                    </div>
+                </button>
             </div>
         </section>
+
+        <!-- ==================== HALAMAN GAJI KARYAWAN ==================== -->
+        <section id="tab-gaji" class="tab-content rbac-owner">
+            <div class="mb-4 flex items-center justify-between">
+                <button onclick="showTab('laporan-hub')" class="inline-flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-700 hover:text-primary border border-slate-200/80 px-4 py-2.5 rounded-xl font-extrabold text-xs sm:text-sm shadow-sm transition group" title="Kembali ke Pusat Laporan">
+                    <i class="fa-solid fa-arrow-left text-primary group-hover:-translate-x-1 transition-transform"></i>
+                    <span>Kembali ke Menu Laporan</span>
+                </button>
+            </div>
+            
+            <div class="bg-gradient-to-r from-blue-600 via-indigo-600 to-indigo-800 rounded-2xl p-6 text-white shadow-lg mb-6 flex justify-between items-center relative overflow-hidden">
+                <div class="relative z-10">
+                    <h2 class="text-2xl font-black mb-1">Modul Gaji Karyawan</h2>
+                    <p class="text-blue-100 text-sm font-medium">Perhitungan komisi otomatis &amp; kelola data karyawan</p>
+                </div>
+                <div class="text-5xl text-white/20 absolute -right-4 -bottom-4 rotate-12">
+                    <i class="fa-solid fa-file-invoice-dollar"></i>
+                </div>
+            </div>
+
+            <!-- Internal Tabs -->
+            <div class="flex flex-wrap gap-2 mb-6 border-b border-slate-200 pb-2">
+                <button onclick="switchGajiTab('karyawan')" id="btn-gaji-tab-karyawan" class="px-5 py-2 rounded-xl text-sm font-bold bg-blue-50 text-blue-600 border border-blue-200 transition">Data Karyawan</button>
+                <button onclick="switchGajiTab('bayar')" id="btn-gaji-tab-bayar" class="px-5 py-2 rounded-xl text-sm font-bold text-slate-500 hover:text-slate-700 hover:bg-slate-50 transition">Bayar Gaji</button>
+                <button onclick="switchGajiTab('riwayat')" id="btn-gaji-tab-riwayat" class="px-5 py-2 rounded-xl text-sm font-bold text-slate-500 hover:text-slate-700 hover:bg-slate-50 transition">Riwayat Pembayaran</button>
+            </div>
+
+            <!-- 1. Data Karyawan -->
+            <div id="gaji-sec-karyawan">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-bold text-navy">Daftar Karyawan</h3>
+                    <button onclick="openEmployeeModal()" class="bg-primary hover:bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-sm transition">
+                        <i class="fa-solid fa-plus mr-1"></i> Tambah Karyawan
+                    </button>
+                </div>
+                <div class="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 text-slate-600 text-xs uppercase tracking-wider font-bold border-b border-slate-200">
+                                    <th class="p-4">ID</th>
+                                    <th class="p-4">Nama Karyawan</th>
+                                    <th class="p-4">Posisi / Jabatan</th>
+                                    <th class="p-4 text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="employee-table-body" class="divide-y divide-slate-100">
+                                <!-- render dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Bayar Gaji -->
+            <div id="gaji-sec-bayar" class="hidden">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Form Input Kerja -->
+                    <div class="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm">
+                        <h3 class="text-lg font-bold text-navy mb-4 border-b border-slate-100 pb-3">Input Kinerja (Komisi)</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">Pilih Karyawan</label>
+                                <select id="payroll-employee" class="w-full border border-slate-300 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary/40 focus:outline-none" onchange="calculatePayroll()"></select>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">Tgl Mulai</label>
+                                    <input type="date" id="payroll-start" class="w-full border border-slate-300 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-primary/40 focus:outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-700 mb-1">Tgl Akhir</label>
+                                    <input type="date" id="payroll-end" class="w-full border border-slate-300 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-primary/40 focus:outline-none">
+                                </div>
+                            </div>
+                            
+                            <!-- Komisi 37,5% -->
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">Total Layanan (Kiloan &amp; Satuan) - Rp</label>
+                                <div class="relative">
+                                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">Rp</span>
+                                    <input type="number" id="payroll-total-service" value="0" min="0" class="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-xl text-sm font-bold text-navy focus:ring-2 focus:ring-primary/40" oninput="calculatePayroll()">
+                                </div>
+                                <p class="text-[10px] text-slate-400 mt-1">Otomatis dihitung 37.5% untuk komisi</p>
+                            </div>
+                            <!-- Komisi Spotting -->
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">Total Spotting (Pcs)</label>
+                                <div class="relative">
+                                    <span class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">Pcs</span>
+                                    <input type="number" id="payroll-total-spotting" value="0" min="0" class="w-full px-4 py-2.5 border border-slate-300 rounded-xl text-sm font-bold text-navy focus:ring-2 focus:ring-primary/40" oninput="calculatePayroll()">
+                                </div>
+                                <p class="text-[10px] text-slate-400 mt-1">Otomatis dihitung Rp 2.000 / pcs</p>
+                            </div>
+                            
+                            <hr class="border-slate-100">
+                            <!-- Potongan/Kasbon -->
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">Potongan / Kasbon (Opsional) - Rp</label>
+                                <div class="relative">
+                                    <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">Rp</span>
+                                    <input type="number" id="payroll-deduction" value="0" min="0" class="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-xl text-sm font-bold text-rose-600 focus:ring-2 focus:ring-rose-400 focus:outline-none" oninput="calculatePayroll()">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Kalkulasi & Slip Preview -->
+                    <div class="bg-slate-50 border border-slate-200 rounded-2xl p-6 shadow-inner flex flex-col justify-between">
+                        <div id="slip-gaji-print-area">
+                            <h3 class="text-lg font-black text-navy mb-4 border-b border-slate-200 pb-3 flex justify-between items-center">
+                                <span>Rincian Slip Gaji</span>
+                                <span id="payroll-preview-name" class="text-primary text-sm font-bold bg-blue-100 px-3 py-1 rounded-md">Pilih Karyawan</span>
+                            </h3>
+                            
+                            <div class="space-y-3 font-mono text-sm">
+                                <div class="flex justify-between items-center text-slate-600">
+                                    <span>Komisi Layanan (37.5%) :</span>
+                                    <span id="preview-calc-service" class="font-bold text-navy">Rp 0</span>
+                                </div>
+                                <div class="flex justify-between items-center text-slate-600">
+                                    <span>Komisi Spotting (Rp 2rb/pcs) :</span>
+                                    <span id="preview-calc-spotting" class="font-bold text-navy">Rp 0</span>
+                                </div>
+                                <div class="flex justify-between items-center text-rose-500 pt-2 border-t border-slate-200">
+                                    <span>Potongan / Kasbon :</span>
+                                    <span id="preview-calc-deduction" class="font-bold">- Rp 0</span>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-8">
+                                <div class="bg-indigo-900 rounded-xl p-4 text-white flex justify-between items-center shadow-md mb-4">
+                                    <span class="font-bold text-sm text-indigo-100">TOTAL TAKE HOME PAY :</span>
+                                    <span id="preview-calc-total" class="font-black text-xl text-emerald-400">Rp 0</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <button onclick="submitPayroll()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-black py-3.5 rounded-xl shadow-lg transition flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-check-double"></i> Bayar &amp; Simpan Gaji
+                            </button>
+                            <p class="text-center text-[10px] text-slate-400 mt-2 font-medium"><i class="fa-solid fa-info-circle"></i> Menyimpan gaji otomatis memotong saldo Arus Kas perusahaan.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Riwayat Pembayaran -->
+            <div id="gaji-sec-riwayat" class="hidden">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-bold text-navy">Riwayat Pembayaran Gaji</h3>
+                </div>
+                <div class="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 text-slate-600 text-xs uppercase tracking-wider font-bold border-b border-slate-200">
+                                    <th class="p-4">ID Slip</th>
+                                    <th class="p-4">Tgl Bayar</th>
+                                    <th class="p-4">Karyawan</th>
+                                    <th class="p-4">Periode</th>
+                                    <th class="p-4 text-right">Total Take Home Pay</th>
+                                    <th class="p-4 text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="payroll-table-body" class="divide-y divide-slate-100">
+                                <!-- render dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Employee Modal -->
+        <div id="employee-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 opacity-0 transition-opacity">
+            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden transform scale-95 transition-transform duration-300">
+                <div class="bg-slate-50 px-6 py-4 border-b border-slate-100 flex justify-between items-center">
+                    <h3 class="font-black text-navy text-lg" id="employee-modal-title">Tambah Karyawan</h3>
+                    <button onclick="closeEmployeeModal()" class="text-slate-400 hover:text-rose-500 transition"><i class="fa-solid fa-xmark text-xl"></i></button>
+                </div>
+                <div class="p-6">
+                    <form onsubmit="saveEmployee(event)" class="space-y-4">
+                        <input type="hidden" id="emp-id-input">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Nama Karyawan</label>
+                            <input type="text" id="emp-name-input" required class="w-full border border-slate-300 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-primary/40 focus:outline-none" placeholder="Masukkan nama">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Posisi / Jabatan</label>
+                            <input type="text" id="emp-role-input" required class="w-full border border-slate-300 rounded-xl px-4 py-2 text-sm focus:ring-2 focus:ring-primary/40 focus:outline-none" placeholder="Misal: Pegawai Cuci / Kasir">
+                        </div>
+                        <button type="submit" class="w-full bg-primary hover:bg-blue-600 text-white font-bold py-3 rounded-xl shadow-md transition mt-2">Simpan Data</button>
+                    </form>
+                </div>
+            </div>
+        </div>
 
         <!-- ==================== HUB AKUN (LEMBARAN PENUH MENU AKUN) ==================== -->
         <section id="tab-akun-hub" class="tab-content">
@@ -1194,6 +1415,7 @@
                 <!-- 11 Cards Menu Laporan Keuangan -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     <!-- 1. Analisa Omzet -->
+                    <!-- 1. Analisa Omzet -->
                     <button onclick="switchFinanceSubmenu('omzet')" class="bg-white hover:bg-slate-50 border border-slate-200/80 hover:border-primary/50 rounded-2xl p-5 shadow-card hover:shadow-lg transition text-left group flex items-center gap-4">
                         <div class="w-12 h-12 rounded-xl bg-sky-50 text-sky-500 flex items-center justify-center text-xl shrink-0 group-hover:scale-110 transition-transform">
                             <i class="fa-solid fa-chart-line"></i>
@@ -1201,6 +1423,18 @@
                         <div class="flex-1 min-w-0">
                             <h4 class="text-base font-extrabold text-navy group-hover:text-primary transition truncate">Analisa Omzet</h4>
                             <p class="text-xs text-slate-400 font-medium">Tren pendapatan & ringkasan omzet</p>
+                        </div>
+                        <i class="fa-solid fa-chevron-right text-slate-300 group-hover:text-primary transition"></i>
+                    </button>
+
+                    <!-- Laporan Laba Rugi -->
+                    <button onclick="switchFinanceSubmenu('labarugi')" class="bg-white hover:bg-slate-50 border border-slate-200/80 hover:border-primary/50 rounded-2xl p-5 shadow-card hover:shadow-lg transition text-left group flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-orange-50 text-orange-500 flex items-center justify-center text-xl shrink-0 group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-file-invoice"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h4 class="text-base font-extrabold text-navy group-hover:text-primary transition truncate">Laporan Laba/Rugi</h4>
+                            <p class="text-xs text-slate-400 font-medium">Pendapatan, HPP, & Laba Bersih</p>
                         </div>
                         <i class="fa-solid fa-chevron-right text-slate-300 group-hover:text-primary transition"></i>
                     </button>
@@ -1344,11 +1578,17 @@
                             <span>Manjur Laundry</span>
                         </div>
 
-                        <!-- Pojok Kanan Atas: Export Excel XLS -->
-                        <button onclick="exportFinancesToExcel()" class="bg-emerald-50 hover:bg-emerald-600 text-emerald-600 hover:text-white font-bold px-3.5 py-2 rounded-xl text-xs sm:text-sm flex items-center gap-1.5 transition border border-emerald-200 shadow-sm">
-                            <i class="fa-solid fa-file-excel text-base"></i>
-                            <span>XLS</span>
-                        </button>
+                        <!-- Pojok Kanan Atas: Export Excel XLS & PDF -->
+                        <div class="flex items-center gap-2">
+                            <button onclick="exportFinancesToPDF()" class="bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white font-bold px-3.5 py-2 rounded-xl text-xs sm:text-sm flex items-center gap-1.5 transition border border-rose-200 shadow-sm">
+                                <i class="fa-solid fa-file-pdf text-base"></i>
+                                <span>PDF</span>
+                            </button>
+                            <button onclick="exportFinancesToExcel()" class="bg-emerald-50 hover:bg-emerald-600 text-emerald-600 hover:text-white font-bold px-3.5 py-2 rounded-xl text-xs sm:text-sm flex items-center gap-1.5 transition border border-emerald-200 shadow-sm">
+                                <i class="fa-solid fa-file-excel text-base"></i>
+                                <span>XLS</span>
+                            </button>
+                        </div>
                     </div>
 
                     <!-- Judul Besar Laporan persis seperti gambar -->
@@ -1383,9 +1623,13 @@
                             <option value="LAST_7">7 Hari Terakhir</option>
                             <option value="LAST_30">30 Hari Terakhir</option>
                             <option value="THIS_MONTH" selected>Bulan Ini</option>
-                            <option value="CUSTOM_DATE">Per Tanggal</option>
+                            <option value="CUSTOM_DATE">Rentang Tanggal</option>
                         </select>
-                        <input type="date" id="fin-custom-date" onchange="renderFinancesTable()" class="hidden border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 bg-white shadow-sm">
+                        <div id="fin-custom-date-container" class="hidden flex items-center gap-2">
+                            <input type="date" id="fin-custom-date-start" onchange="renderFinancesTable()" class="border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 bg-white shadow-sm">
+                            <span class="text-xs text-slate-500 font-bold">-</span>
+                            <input type="date" id="fin-custom-date-end" onchange="renderFinancesTable()" class="border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 bg-white shadow-sm">
+                        </div>
                     </div>
                 </div>
 
@@ -1428,15 +1672,9 @@
                         <span id="fin-table-count" class="text-xs text-slate-400 font-semibold">0 Transaksi</span>
                     </div>
                     <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse text-sm">
-                            <thead>
-                                <tr class="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold text-xs uppercase tracking-wider">
-                                    <th class="p-4">ID Jurnal</th>
-                                    <th class="p-4">Tanggal</th>
-                                    <th class="p-4">Keterangan / Transaksi</th>
-                                    <th class="p-4 text-right">Nominal (Rp)</th>
-                                    <th class="p-4 text-center">Aksi</th>
-                                </tr>
+                        <table id="finances-table-element" class="w-full text-left border-collapse text-sm">
+                            <thead id="finances-table-head">
+                                <!-- Populated dynamically -->
                             </thead>
                             <tbody id="finances-table-body" class="divide-y divide-slate-100 font-medium">
                                 <!-- Populated dynamically -->
@@ -1672,6 +1910,29 @@
                                 <input type="text" id="prof-company-tagline" placeholder="Contoh: Bersih, Harum, Cepat, & Manjur!" oninput="updateProfileLivePreview()" class="w-full border border-slate-300 rounded-xl pl-10 pr-4 py-3 text-sm font-medium text-slate-600 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition">
                             </div>
                         </div>
+                        
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1.5">Logo Perusahaan / Outlet (Opsional)</label>
+                            <div class="flex items-center gap-4 bg-slate-50 border border-slate-200 p-3 rounded-xl">
+                                <img id="prof-logo-preview" src="logo_manjur.png" alt="Logo" class="w-16 h-16 rounded-xl border border-slate-200 object-contain p-1 bg-white shadow-sm">
+                                <div class="flex-1">
+                                    <input type="file" id="prof-company-logo" accept="image/png, image/jpeg, image/webp" onchange="handleLogoUpload(event)" class="text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-emerald-100 file:text-emerald-700 hover:file:bg-emerald-200 transition w-full cursor-pointer">
+                                    <button type="button" onclick="handleRemoveLogo()" class="text-[11px] text-rose-500 font-bold hover:text-rose-700 transition mt-1"><i class="fa-solid fa-trash"></i> Hapus Logo Saat Ini</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1.5">
+                                Pesan Bawah Struk (Footer)
+                            </label>
+                            <div class="relative">
+                                <span class="absolute top-3.5 left-0 pl-3.5 flex items-start pointer-events-none text-slate-400">
+                                    <i class="fa-solid fa-note-sticky"></i>
+                                </span>
+                                <textarea id="prof-company-footer" rows="2" placeholder="Contoh: Terima Kasih! Barang yang sudah diambil tidak dapat dikembalikan." oninput="updateProfileLivePreview()" class="w-full border border-slate-300 rounded-xl pl-10 pr-4 py-3 text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition"></textarea>
+                            </div>
+                        </div>
 
                         <div class="pt-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
                             <button type="button" onclick="handleResetCompanyProfile()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold px-5 py-3 rounded-xl text-xs transition flex items-center gap-2">
@@ -1697,7 +1958,7 @@
 
                         <!-- Thermal Paper Mockup -->
                         <div class="bg-white text-slate-900 rounded-2xl p-5 shadow-inner border border-slate-200 font-mono text-center">
-                            <img src="logo_manjur.png" alt="Logo" class="h-12 w-auto object-contain mx-auto mb-1.5">
+                            <img id="live-preview-prof-img" src="logo_manjur.png" alt="Logo" class="h-12 w-auto object-contain mx-auto mb-1.5">
                             <h5 id="live-preview-prof-name" class="font-black text-sm uppercase tracking-tight text-navy">MANJUR LAUNDRY</h5>
                             <p id="live-preview-prof-tagline" class="text-[10px] font-bold text-emerald-600 mt-0.5">Bersih, Harum, Cepat, &amp; Manjur!</p>
                             <p id="live-preview-prof-address" class="text-[10px] text-slate-600 mt-1 font-sans leading-tight">Jl. Raya Bersih Manjur No. 88, Kota Laundry</p>
@@ -1707,6 +1968,13 @@
                                 <div class="flex justify-between"><span>No Nota:</span><span class="font-bold text-slate-800">MJL-DEMO</span></div>
                                 <div class="flex justify-between"><span>Pelanggan:</span><span class="font-bold text-slate-800">Pelanggan Setia</span></div>
                             </div>
+                            
+                            <!-- Dummy items -->
+                            <div class="text-[10px] text-left border-b border-dashed border-slate-400 pb-2 mb-2">
+                                <div class="flex justify-between font-bold"><span>1x Cuci Komplit</span><span>Rp 15.000</span></div>
+                            </div>
+                            
+                            <p id="live-preview-prof-footer" class="text-[9px] text-slate-500 italic leading-tight">Terima kasih telah mencuci di Manjur Laundry!</p>
                         </div>
                     </div>
 
@@ -2318,6 +2586,8 @@
             transactions: [],
             inventory: [],
             finances: [],
+            employees: [],
+            payrolls: [],
             users: []
         };
 
@@ -2519,6 +2789,8 @@
                 appState.inventory = parsed.inventory || SAMPLE_DATA.inventory;
                 appState.finances = parsed.finances || SAMPLE_DATA.finances;
                 appState.transactions = parsed.transactions || SAMPLE_DATA.transactions;
+                appState.employees = parsed.employees || [];
+                appState.payrolls = parsed.payrolls || [];
                 if (Array.isArray(appState.transactions)) {
                     appState.transactions.forEach((t, idx) => {
                         if (t && t.id && (t.id.startsWith('TRX-') || t.id.startsWith('MJR-') || (t.id.startsWith('MJL-') && t.id.split('-')[1] && t.id.split('-')[1].length === 8))) {
@@ -2597,6 +2869,8 @@
                 finances: appState.finances,
                 transactions: appState.transactions,
                 users: appState.users,
+                employees: appState.employees,
+                payrolls: appState.payrolls,
                 companyProfile: appState.companyProfile
             }));
             renderAll();
@@ -2605,6 +2879,13 @@
 
         // ==================== SISTEM LOGIN & PASSWORD PROTECT ====================
         function checkLoginStatus() {
+            // BYPASS LOGIN SEMENTARA
+            const ownerUser = appState.users.find(u => (u.username || '').toLowerCase() === 'owner') || SAMPLE_DATA.users[0];
+            applyLoginUser(ownerUser);
+            document.getElementById('login-screen').classList.add('hidden');
+            return;
+            
+            // Kode asli disembunyikan sementara:
             const loggedInUserStr = localStorage.getItem('manjur_logged_user') || sessionStorage.getItem('manjur_logged_user');
             if (loggedInUserStr) {
                 const user = JSON.parse(loggedInUserStr);
@@ -3075,29 +3356,10 @@
                 const isOpen = posOpenAccordionCategories.has(cat);
                 const hasSelectedService = servicesInCat.some(s => s.id === selectedServiceId);
 
-                let cardsHtml = '';
+                let optionsHtml = '<option value="">-- Pilih Layanan --</option>';
                 servicesInCat.forEach(s => {
                     const isSelected = s.id === selectedServiceId;
-                    cardsHtml += `
-                        <div onclick="selectService('${s.id}', '${escapeQuote(s.name)}', ${s.price}, '${s.unit}')" 
-                             class="service-card cursor-pointer border-2 ${isSelected ? 'border-primary bg-primary-light/40 ring-2 ring-primary shadow-sm scale-[1.01]' : 'border-slate-200 bg-white hover:border-primary/70 hover:bg-primary-light/20'} rounded-xl p-3.5 text-center transition-all relative group flex flex-col items-center justify-between">
-                            ${isSelected ? `
-                                <span class="absolute top-1.5 left-1.5 bg-primary text-white w-5 h-5 rounded-full text-[10px] flex items-center justify-center shadow-sm">
-                                    <i class="fa-solid fa-check"></i>
-                                </span>
-                            ` : ''}
-                            ${appState.currentRole === 'Owner' ? `
-                                <button onclick="event.stopPropagation(); openEditServiceModal('${s.id}')" title="Edit Layanan ini" class="absolute top-1.5 right-1.5 bg-amber-100 text-amber-800 hover:bg-amber-500 hover:text-white w-6 h-6 rounded-full text-[10px] flex items-center justify-center transition shadow-sm">
-                                    <i class="fa-solid fa-pen"></i>
-                                </button>
-                            ` : ''}
-                            <div class="w-10 h-10 rounded-xl ${isSelected ? 'bg-primary text-white shadow-sm' : 'bg-primary-light/50 text-primary'} flex items-center justify-center text-lg mb-2 transition">
-                                <i class="fa-solid ${s.icon || 'fa-shirt'}"></i>
-                            </div>
-                            <h4 class="text-xs font-bold text-navy line-clamp-2 leading-snug mb-1">${s.name}</h4>
-                            <p class="text-xs text-accent font-extrabold mt-auto pt-1">${formatRupiah(s.price)} / ${s.unit}</p>
-                        </div>
-                    `;
+                    optionsHtml += `<option value="${s.id}" data-name="${escapeQuote(s.name)}" data-price="${s.price}" data-unit="${s.unit}" ${isSelected ? 'selected' : ''}>${s.name} - Rp ${formatRupiah(s.price)} / ${s.unit}</option>`;
                 });
 
                 grid.innerHTML += `
@@ -3130,8 +3392,13 @@
                         <!-- Accordion Slide Body -->
                         <div id="pos-accordion-body-${cat.replace(/\s+/g, '-')}" 
                              class="transition-all duration-300 ease-in-out overflow-hidden ${isOpen ? 'max-h-[1500px] opacity-100 p-3.5' : 'max-h-0 opacity-0 py-0 px-3.5'}">
-                            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                                ${cardsHtml}
+                            <div class="p-2 relative">
+                                <select onchange="handlePosServiceSelectChange(this)" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary appearance-none cursor-pointer">
+                                    ${optionsHtml}
+                                </select>
+                                <div class="pointer-events-none absolute inset-y-0 right-4 flex items-center px-2 text-slate-500">
+                                    <i class="fa-solid fa-chevron-down text-xs"></i>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -3213,6 +3480,18 @@
                 posOpenAccordionCategories.add(categoryName);
             }
             renderPosServices();
+        }
+
+        function handlePosServiceSelectChange(selectElement) {
+            const selectedOption = selectElement.options[selectElement.selectedIndex];
+            if (!selectedOption.value) return; 
+            
+            const id = selectedOption.value;
+            const name = selectedOption.getAttribute('data-name');
+            const price = parseFloat(selectedOption.getAttribute('data-price'));
+            const unit = selectedOption.getAttribute('data-unit');
+            
+            selectService(id, name, price, unit);
         }
 
         function selectService(id, name, price, unit) {
@@ -3874,8 +4153,8 @@
                     <!-- Footer Thermal -->
                     <div class="${is58 ? 'text-[8px] space-y-1' : 'text-[10px] space-y-1.5'} text-center text-slate-600 font-sans">
                         ${trx.notes ? `<div class="italic bg-slate-100 ${is58 ? 'p-1' : 'p-1.5'} rounded font-medium text-slate-800 border border-slate-200">Catatan: "${trx.notes}"</div>` : ''}
-                        <p class="font-bold uppercase text-slate-800 tracking-wide">--- TERIMA KASIH KUNJUNGAN ANDA ---</p>
-                        <p class="leading-tight">Periksa pakaian Anda. Garansi komplain maks <b>2x24 jam</b> disertai nota asli.</p>
+                        <p class="font-bold uppercase text-slate-800 tracking-wide">--- TERIMA KASIH ---</p>
+                        <p class="leading-tight">${appState.companyProfile?.footer || 'Terima kasih telah mencuci di Manjur Laundry!'}</p>
                         <div class="${is58 ? 'pt-1' : 'pt-2'} flex flex-col items-center justify-center">
                             <div class="font-mono tracking-[0.2em] ${is58 ? 'text-[9px] py-0.5' : 'text-xs py-1'} font-black border-y border-slate-800 text-slate-800 select-none">||| | |||| || | || |||</div>
                             <span class="${is58 ? 'text-[8px]' : 'text-[9px]'} font-mono text-slate-500 mt-0.5">*${trx.id}*</span>
@@ -4286,9 +4565,8 @@
 
                     // Footer Center
                     commands.push(new Uint8Array([0x1B, 0x61, 0x01]));
-                    commands.push(enc.encode("TERIMA KASIH KUNJUNGAN ANDA\n"));
-                    commands.push(enc.encode("Periksa kembali pakaian Anda.\n"));
-                    commands.push(enc.encode("Komplain max 2x24jam nota asli\n\n"));
+                    const footerTxt = appState.companyProfile?.footer || 'Terima kasih telah mencuci di Manjur Laundry!';
+                    commands.push(enc.encode(footerTxt + "\n\n"));
                     commands.push(enc.encode("||| | |||| || | || |||\n"));
                     commands.push(enc.encode(`*${trx.id}*\n`));
 
@@ -4801,7 +5079,9 @@
                 'pengeluaran': { title: 'Pengeluaran', sub: 'RINCIAN KAS KELUAR OPERASIONAL' },
                 'pemindahan': { title: 'Pemindahan Saldo', sub: 'MUTASI DAN PEMINDAHAN SALDO' },
                 'piutang': { title: 'Kasbon dan Piutang', sub: 'REKAP PINJAMAN DAN PIUTANG' },
-                'hutang': { title: 'Hutang Usaha', sub: 'REKAP HUTANG DAN KEWAJIBAN USAHA' }
+                'hutang': { title: 'Hutang Usaha', sub: 'REKAP HUTANG DAN KEWAJIBAN USAHA' },
+                'labarugi': { title: 'Laporan Laba/Rugi', sub: 'INCOME STATEMENT' },
+                'gaji': { title: 'Gaji Karyawan', sub: 'PERHITUNGAN GAJI OTOMATIS (WIP)' }
             };
 
             if (titles[sub]) {
@@ -4843,13 +5123,14 @@
         function getFilteredFinancesList() {
             const monthSelect = document.getElementById('fin-month-filter');
             const filterVal = monthSelect ? monthSelect.value : 'THIS_MONTH';
-            const customDateInput = document.getElementById('fin-custom-date');
-            if (customDateInput) {
+            const customDateContainer = document.getElementById('fin-custom-date-container');
+            if (customDateContainer) {
                 if (filterVal === 'CUSTOM_DATE') {
-                    customDateInput.classList.remove('hidden');
-                    if (!customDateInput.value) customDateInput.value = new Date().toISOString().split('T')[0];
+                    customDateContainer.classList.remove('hidden');
+                    if (!document.getElementById('fin-custom-date-start').value) document.getElementById('fin-custom-date-start').value = new Date().toISOString().split('T')[0];
+                    if (!document.getElementById('fin-custom-date-end').value) document.getElementById('fin-custom-date-end').value = new Date().toISOString().split('T')[0];
                 } else {
-                    customDateInput.classList.add('hidden');
+                    customDateContainer.classList.add('hidden');
                 }
             }
 
@@ -4877,8 +5158,9 @@
                 } else if (filterVal === 'THIS_MONTH') {
                     return fDate.getFullYear() === now.getFullYear() && fDate.getMonth() === now.getMonth();
                 } else if (filterVal === 'CUSTOM_DATE') {
-                    const cVal = customDateInput ? customDateInput.value : todayStr;
-                    return fDateStr === cVal;
+                    const startStr = document.getElementById('fin-custom-date-start') ? document.getElementById('fin-custom-date-start').value : todayStr;
+                    const endStr = document.getElementById('fin-custom-date-end') ? document.getElementById('fin-custom-date-end').value : todayStr;
+                    return fDateStr >= startStr && fDateStr <= endStr;
                 } else {
                     return getFinanceMonthYear(f.date) === filterVal;
                 }
@@ -4946,22 +5228,142 @@
                 });
             }
 
+            const thead = document.getElementById('finances-table-head');
+            if (sub === 'labarugi') {
+                if (thead) thead.innerHTML = `
+                    <tr class="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold text-xs uppercase tracking-wider">
+                        <th class="p-4" colspan="2">Komponen Laporan</th>
+                        <th class="p-4 text-right">Nominal (Rp)</th>
+                    </tr>
+                `;
+            } else if (sub === 'arus') {
+                if (thead) thead.innerHTML = `
+                    <tr class="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold text-xs uppercase tracking-wider">
+                        <th class="p-4">Tanggal</th>
+                        <th class="p-4">Keterangan</th>
+                        <th class="p-4 text-right">Debet (Masuk)</th>
+                        <th class="p-4 text-right">Kredit (Keluar)</th>
+                        <th class="p-4 text-right">Saldo</th>
+                        <th class="p-4 text-center">Aksi</th>
+                    </tr>
+                `;
+            } else {
+                if (thead) thead.innerHTML = `
+                    <tr class="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold text-xs uppercase tracking-wider">
+                        <th class="p-4">ID Jurnal</th>
+                        <th class="p-4">Tanggal</th>
+                        <th class="p-4">Keterangan / Transaksi</th>
+                        <th class="p-4 text-right">Nominal (Rp)</th>
+                        <th class="p-4 text-center">Aksi</th>
+                    </tr>
+                `;
+            }
+
             tbody.innerHTML = '';
 
             let totIncome = 0;
             let totExpense = 0;
             let totSubAmount = 0;
+            let currentSaldo = 0;
 
             if (filteredFinances.length === 0) {
                 tbody.innerHTML = `
                     <tr>
-                        <td colspan="5" class="p-10 text-center text-slate-400 font-medium">
+                        <td colspan="6" class="p-10 text-center text-slate-400 font-medium">
                             <i class="fa-solid fa-calendar-xmark text-4xl mb-3 block text-slate-300"></i>
-                            Tidak ada catatan keuangan pada bulan yang dipilih
+                            Tidak ada catatan keuangan pada periode ini
                         </td>
                     </tr>
                 `;
+            } else if (sub === 'labarugi') {
+                // Laba Rugi Structure
+                let pendapatan = 0;
+                let hpp = 0;
+                let biayaOperasional = 0;
+                
+                filteredFinances.forEach(f => {
+                    const amt = parseFloat(f.amount) || 0;
+                    const cat = (f.category || '').toLowerCase();
+                    if (f.type === 'Pemasukan') {
+                        pendapatan += amt;
+                        totIncome += amt;
+                        totSubAmount += amt;
+                    } else {
+                        if (cat.includes('restock') || cat.includes('barang')) {
+                            hpp += amt;
+                        } else {
+                            biayaOperasional += amt;
+                        }
+                        totExpense += amt;
+                    }
+                });
+
+                const labaKotor = pendapatan - hpp;
+                const labaBersih = labaKotor - biayaOperasional;
+
+                tbody.innerHTML = `
+                    <tr class="bg-slate-50">
+                        <td class="p-4 font-bold text-navy" colspan="2">1. PENDAPATAN</td>
+                        <td class="p-4 text-right font-black text-emerald-600">${formatRupiah(pendapatan)}</td>
+                    </tr>
+                    <tr>
+                        <td class="p-4 text-slate-600 pl-8" colspan="2">2. HARGA POKOK PENJUALAN (HPP) / Restock Inventory</td>
+                        <td class="p-4 text-right font-bold text-rose-600">- ${formatRupiah(hpp)}</td>
+                    </tr>
+                    <tr class="bg-indigo-50 border-t border-b border-indigo-100">
+                        <td class="p-4 font-black text-indigo-900" colspan="2">LABA KOTOR (1 - 2)</td>
+                        <td class="p-4 text-right font-black text-indigo-700">${formatRupiah(labaKotor)}</td>
+                    </tr>
+                    <tr>
+                        <td class="p-4 text-slate-600 pl-8" colspan="2">3. BIAYA OPERASIONAL (Gaji, Listrik, dll)</td>
+                        <td class="p-4 text-right font-bold text-rose-600">- ${formatRupiah(biayaOperasional)}</td>
+                    </tr>
+                    <tr class="bg-gradient-to-r from-slate-900 via-navy to-slate-800 text-white font-black shadow-md">
+                        <td class="p-4 text-right uppercase tracking-wider" colspan="2">
+                            <i class="fa-solid fa-scale-balanced text-amber-400 mr-1.5"></i> LABA BERSIH :
+                        </td>
+                        <td class="p-4 text-right text-base ${labaBersih >= 0 ? 'text-emerald-400' : 'text-rose-400'} font-mono">
+                            ${labaBersih >= 0 ? '+ ' : ''}${formatRupiah(labaBersih)}
+                        </td>
+                    </tr>
+                `;
+            } else if (sub === 'arus') {
+                // Buku Kas (Arus Kas) Structure
+                const sortedFinances = [...filteredFinances].sort((a, b) => new Date(a.date) - new Date(b.date));
+                
+                sortedFinances.forEach(f => {
+                    const amt = parseFloat(f.amount) || 0;
+                    const dateStr = new Date(f.date).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+                    
+                    let debet = 0;
+                    let kredit = 0;
+                    if (f.type === 'Pemasukan') {
+                        debet = amt;
+                        currentSaldo += amt;
+                        totIncome += amt;
+                    } else {
+                        kredit = amt;
+                        currentSaldo -= amt;
+                        totExpense += amt;
+                    }
+
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-slate-50/80 transition">
+                            <td class="p-4 text-xs text-slate-500 whitespace-nowrap">${dateStr}<br><span class="text-[10px] text-slate-400 font-mono">${f.id}</span></td>
+                            <td class="p-4 text-xs text-slate-700 font-medium">${f.description}</td>
+                            <td class="p-4 text-right text-xs text-emerald-600 font-mono">${debet > 0 ? formatRupiah(debet) : '-'}</td>
+                            <td class="p-4 text-right text-xs text-rose-600 font-mono">${kredit > 0 ? formatRupiah(kredit) : '-'}</td>
+                            <td class="p-4 text-right text-sm font-black text-navy font-mono">${formatRupiah(currentSaldo)}</td>
+                            <td class="p-4 text-center">
+                                <button onclick="deleteFinanceRecord('${f.id}')" title="Hapus Jurnal" class="text-slate-400 hover:text-rose-600 p-1 transition">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
             } else {
+                // Mode Default (Selain Laba Rugi dan Arus Kas)
                 const incomeList = filteredFinances.filter(f => f.type === 'Pemasukan');
                 const expenseList = filteredFinances.filter(f => f.type === 'Pengeluaran');
 
@@ -5103,68 +5505,108 @@
                 finArusKasChartInstance = null;
             }
 
-            const netProfit = totIncome - totExpense;
+            const sub = appState.activeFinanceSubmenu || 'arus';
 
-            const pieShadow3DPlugin = {
-                id: 'pieShadow3D',
-                beforeDraw: (chart) => {
-                    const c = chart.ctx;
-                    c.save();
-                    c.shadowColor = 'rgba(15, 23, 42, 0.22)';
-                    c.shadowBlur = 16;
-                    c.shadowOffsetX = 5;
-                    c.shadowOffsetY = 10;
-                },
-                afterDraw: (chart) => {
-                    chart.ctx.restore();
-                }
-            };
+            if (sub === 'arus' || sub === 'omzet' || sub === 'labarugi') {
+                // Bar Chart Trend Arus Kas
+                const dailyData = {};
+                filteredFinances.forEach(f => {
+                    if (!f.date) return;
+                    const dateStr = f.date.split('T')[0];
+                    if (!dailyData[dateStr]) dailyData[dateStr] = { in: 0, out: 0 };
+                    if (f.type === 'Pemasukan') dailyData[dateStr].in += parseFloat(f.amount) || 0;
+                    else dailyData[dateStr].out += parseFloat(f.amount) || 0;
+                });
+                
+                const sortedDates = Object.keys(dailyData).sort();
+                const labels = sortedDates.map(d => new Date(d).toLocaleDateString('id-ID', { day: '2-digit', month: 'short' }));
+                const dataIn = sortedDates.map(d => dailyData[d].in);
+                const dataOut = sortedDates.map(d => dailyData[d].out);
 
-            finArusKasChartInstance = new Chart(ctx, {
-                type: 'pie',
-                data: {
-                    labels: ['Total Pemasukan', 'Total Pengeluaran'],
-                    datasets: [
-                        {
-                            data: [totIncome, totExpense],
-                            backgroundColor: [
-                                'rgba(16, 185, 129, 0.92)',
-                                'rgba(244, 63, 94, 0.92)'
-                            ],
-                            borderColor: '#ffffff',
-                            borderWidth: 4,
-                            hoverOffset: 16
-                        }
-                    ]
-                },
-                plugins: [pieShadow3DPlugin],
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    layout: {
-                        padding: 18
+                finArusKasChartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            { label: 'Pemasukan', data: dataIn, backgroundColor: '#0ea5e9', borderRadius: 4 },
+                            { label: 'Pengeluaran', data: dataOut, backgroundColor: '#f43f5e', borderRadius: 4 }
+                        ]
                     },
-                    plugins: {
-                        legend: {
-                            position: window.innerWidth < 640 ? 'bottom' : 'right',
-                            labels: {
-                                font: { family: 'Inter', size: 13, weight: 'bold' },
-                                color: '#1e293b',
-                                padding: 16,
-                                usePointStyle: true,
-                                pointStyle: 'circle'
-                            }
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom', labels: { font: { family: 'Inter', size: 11, weight: 'bold' }, usePointStyle: true } },
+                            tooltip: { callbacks: { label: function(c) { return c.dataset.label + ': ' + formatRupiah(c.raw); } } }
                         },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return ' ' + context.label + ': ' + formatRupiah(context.raw || 0);
+                        scales: {
+                            x: { grid: { display: false } },
+                            y: { grid: { borderDash: [4, 4] }, ticks: { callback: function(v) { return 'Rp ' + (v/1000) + 'K'; } } }
+                        }
+                    }
+                });
+            } else {
+                const pieShadow3DPlugin = {
+                    id: 'pieShadow3D',
+                    beforeDraw: (chart) => {
+                        const c = chart.ctx;
+                        c.save();
+                        c.shadowColor = 'rgba(15, 23, 42, 0.22)';
+                        c.shadowBlur = 16;
+                        c.shadowOffsetX = 5;
+                        c.shadowOffsetY = 10;
+                    },
+                    afterDraw: (chart) => {
+                        chart.ctx.restore();
+                    }
+                };
+
+                finArusKasChartInstance = new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: ['Total Pemasukan', 'Total Pengeluaran'],
+                        datasets: [
+                            {
+                                data: [totIncome, totExpense],
+                                backgroundColor: [
+                                    'rgba(16, 185, 129, 0.92)',
+                                    'rgba(244, 63, 94, 0.92)'
+                                ],
+                                borderColor: '#ffffff',
+                                borderWidth: 4,
+                                hoverOffset: 16
+                            }
+                        ]
+                    },
+                    plugins: [pieShadow3DPlugin],
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        layout: {
+                            padding: 18
+                        },
+                        plugins: {
+                            legend: {
+                                position: window.innerWidth < 640 ? 'bottom' : 'right',
+                                labels: {
+                                    font: { family: 'Inter', size: 13, weight: 'bold' },
+                                    color: '#1e293b',
+                                    padding: 16,
+                                    usePointStyle: true,
+                                    pointStyle: 'circle'
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return ' ' + context.label + ': ' + formatRupiah(context.raw || 0);
+                                    }
                                 }
                             }
                         }
                     }
-                }
-            });
+                });
+            }
         }
 
         function openFinanceDetailModal(type) {
@@ -5305,6 +5747,31 @@
                     renderFinancesTable();
                 }
             });
+        }
+
+        function exportFinancesToPDF() {
+            const tableContainerEl = document.querySelector('#finances-table-element').parentNode;
+            if (!tableContainerEl) return;
+            
+            const opt = {
+                margin:       10,
+                filename:     'Laporan_Keuangan_Manjur_Laundry.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2 },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
+            };
+            
+            const title = document.createElement('h2');
+            title.innerHTML = 'Laporan Keuangan - Manjur Laundry';
+            title.style.textAlign = 'center';
+            title.style.marginBottom = '20px';
+            title.style.fontFamily = 'Inter, sans-serif';
+            
+            const wrapper = document.createElement('div');
+            wrapper.appendChild(title);
+            wrapper.appendChild(tableContainerEl.cloneNode(true));
+            
+            html2pdf().set(opt).from(wrapper).save();
         }
 
         function exportFinancesToExcel() {
@@ -5919,6 +6386,27 @@
         }
 
         // ==================== MODUL 9: PROFILE PERUSAHAAN & OUTLET ====================
+        let tempLogoBase64 = null;
+
+        function handleLogoUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                tempLogoBase64 = e.target.result;
+                document.getElementById('prof-logo-preview').src = tempLogoBase64;
+                updateProfileLivePreview();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function handleRemoveLogo() {
+            document.getElementById('prof-company-logo').value = '';
+            document.getElementById('prof-logo-preview').src = 'logo_manjur.png';
+            tempLogoBase64 = 'removed';
+            updateProfileLivePreview();
+        }
+
         function applyCompanyProfileToUI() {
             const prof = appState.companyProfile || DEFAULT_COMPANY_PROFILE;
             const hName = document.getElementById('header-company-name');
@@ -5940,6 +6428,22 @@
             if (printAddrPhone) {
                 printAddrPhone.innerHTML = `${prof.address || 'Jl. Raya Bersih Manjur No. 88, Kota Laundry'}<br>WA / Telp: ${prof.phone || '0812-3456-7890'}`;
             }
+            
+            const newLogo = prof.logo || 'logo_manjur.png';
+            
+            // Update logos across the UI
+            const loginLogo = document.querySelector('#login-screen img');
+            if (loginLogo) loginLogo.src = newLogo;
+            
+            const sidebarLogo = document.querySelector('img[alt="Manjur Laundry Logo"]');
+            if (sidebarLogo) sidebarLogo.src = newLogo;
+
+            const profileHeaderLogo = document.querySelector('#tab-profile > div > div > img');
+            if (profileHeaderLogo) profileHeaderLogo.src = newLogo;
+
+            document.querySelectorAll('#print-logo-img').forEach(img => {
+                img.src = newLogo;
+            });
 
             updateProfileLivePreview();
         }
@@ -5950,20 +6454,32 @@
             const inAddr = document.getElementById('prof-company-address');
             const inPhone = document.getElementById('prof-company-phone');
             const inTag = document.getElementById('prof-company-tagline');
+            const inFooter = document.getElementById('prof-company-footer');
 
             if (inName) inName.value = prof.name || '';
             if (inAddr) inAddr.value = prof.address || '';
             if (inPhone) inPhone.value = prof.phone || '';
             if (inTag) inTag.value = prof.tagline || '';
+            if (inFooter) inFooter.value = prof.footer || 'Terima kasih telah mencuci di Manjur Laundry!';
+            
+            tempLogoBase64 = null;
+            const preview = document.getElementById('prof-logo-preview');
+            if (preview) {
+                preview.src = prof.logo ? prof.logo : 'logo_manjur.png';
+            }
+            const logoInput = document.getElementById('prof-company-logo');
+            if (logoInput) logoInput.value = '';
 
             updateProfileLivePreview();
         }
 
         function updateProfileLivePreview() {
-            const nameVal = document.getElementById('prof-company-name')?.value || appState.companyProfile?.name || 'MANJUR LAUNDRY';
-            const addrVal = document.getElementById('prof-company-address')?.value || appState.companyProfile?.address || 'Jl. Raya Bersih Manjur No. 88, Kota Laundry';
-            const phoneVal = document.getElementById('prof-company-phone')?.value || appState.companyProfile?.phone || '0812-3456-7890';
-            const tagVal = document.getElementById('prof-company-tagline')?.value || appState.companyProfile?.tagline || 'Bersih, Harum, Cepat, & Manjur!';
+            const prof = appState.companyProfile || DEFAULT_COMPANY_PROFILE;
+            const nameVal = document.getElementById('prof-company-name')?.value || prof.name || 'MANJUR LAUNDRY';
+            const addrVal = document.getElementById('prof-company-address')?.value || prof.address || 'Jl. Raya Bersih Manjur No. 88, Kota Laundry';
+            const phoneVal = document.getElementById('prof-company-phone')?.value || prof.phone || '0812-3456-7890';
+            const tagVal = document.getElementById('prof-company-tagline')?.value || prof.tagline || 'Bersih, Harum, Cepat, & Manjur!';
+            const footerVal = document.getElementById('prof-company-footer')?.value || prof.footer || 'Terima kasih telah mencuci di Manjur Laundry!';
 
             const lpName = document.getElementById('live-preview-prof-name');
             if (lpName) lpName.innerText = nameVal.toUpperCase();
@@ -5976,29 +6492,54 @@
 
             const lpPhone = document.getElementById('live-preview-prof-phone');
             if (lpPhone) lpPhone.innerText = 'WA/Telp: ' + phoneVal;
+            
+            const lpFooter = document.getElementById('live-preview-prof-footer');
+            if (lpFooter) lpFooter.innerText = footerVal;
+            
+            const lpImg = document.getElementById('live-preview-prof-img');
+            if (lpImg) {
+                if (tempLogoBase64 === 'removed') {
+                    lpImg.src = 'logo_manjur.png';
+                } else if (tempLogoBase64) {
+                    lpImg.src = tempLogoBase64;
+                } else if (prof.logo) {
+                    lpImg.src = prof.logo;
+                } else {
+                    lpImg.src = 'logo_manjur.png';
+                }
+            }
         }
 
         function handleSaveCompanyProfile(e) {
             e.preventDefault();
+            const prof = appState.companyProfile || DEFAULT_COMPANY_PROFILE;
             const nameVal = document.getElementById('prof-company-name').value.trim();
             const addrVal = document.getElementById('prof-company-address').value.trim();
             const phoneVal = document.getElementById('prof-company-phone').value.trim();
             const tagVal = document.getElementById('prof-company-tagline').value.trim();
+            const footerVal = document.getElementById('prof-company-footer')?.value.trim() || '';
 
             if (!nameVal || !addrVal || !phoneVal) {
                 Swal.fire('Data Belum Lengkap', 'Nama Perusahaan, Alamat, dan Nomor Kontak wajib diisi.', 'warning');
                 return;
             }
+            
+            let finalLogo = prof.logo || '';
+            if (tempLogoBase64 === 'removed') finalLogo = '';
+            else if (tempLogoBase64) finalLogo = tempLogoBase64;
 
             appState.companyProfile = {
                 name: nameVal,
                 address: addrVal,
                 phone: phoneVal,
-                tagline: tagVal
+                tagline: tagVal,
+                footer: footerVal,
+                logo: finalLogo
             };
 
             saveData();
             applyCompanyProfileToUI();
+            tempLogoBase64 = null;
 
             Swal.fire({
                 icon: 'success',
@@ -6044,6 +6585,304 @@
             if (appState.currentTab === 'customers') renderCustomersTable();
             if (appState.currentTab === 'users') renderUsersTable();
             if (appState.currentTab === 'profile') renderCompanyProfileForm();
+        }
+
+        // ==================== MODUL GAJI KARYAWAN ====================
+        function switchGajiTab(tab) {
+            document.getElementById('gaji-sec-karyawan').classList.add('hidden');
+            document.getElementById('gaji-sec-bayar').classList.add('hidden');
+            document.getElementById('gaji-sec-riwayat').classList.add('hidden');
+            
+            ['karyawan', 'bayar', 'riwayat'].forEach(t => {
+                const btn = document.getElementById('btn-gaji-tab-' + t);
+                btn.classList.remove('bg-blue-50', 'text-blue-600', 'border-blue-200');
+                btn.classList.add('text-slate-500', 'border-transparent');
+            });
+            
+            document.getElementById('gaji-sec-' + tab).classList.remove('hidden');
+            const activeBtn = document.getElementById('btn-gaji-tab-' + tab);
+            activeBtn.classList.remove('text-slate-500', 'border-transparent');
+            activeBtn.classList.add('bg-blue-50', 'text-blue-600', 'border', 'border-blue-200');
+            
+            if(tab === 'karyawan') renderEmployeesTable();
+            if(tab === 'bayar') updatePayrollEmployeeDropdown();
+            if(tab === 'riwayat') renderPayrollsTable();
+        }
+
+        function renderEmployeesTable() {
+            const tbody = document.getElementById('employee-table-body');
+            if(!tbody) return;
+            tbody.innerHTML = '';
+            
+            if (appState.employees.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-slate-400 italic">Belum ada data karyawan</td></tr>';
+                return;
+            }
+
+            appState.employees.forEach(emp => {
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50/50 transition">
+                        <td class="p-4 text-xs font-mono font-bold text-navy">${emp.id}</td>
+                        <td class="p-4 text-sm font-bold text-slate-800">${emp.name}</td>
+                        <td class="p-4 text-sm text-slate-600">${emp.role}</td>
+                        <td class="p-4 text-center">
+                            <button onclick="editEmployee('${emp.id}')" class="text-blue-500 hover:text-blue-700 px-2 transition"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button onclick="deleteEmployee('${emp.id}')" class="text-rose-500 hover:text-rose-700 px-2 transition"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function openEmployeeModal(id = null) {
+            const modal = document.getElementById('employee-modal');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modal.children[0].classList.remove('scale-95');
+            }, 10);
+
+            if (id) {
+                const emp = appState.employees.find(e => e.id === id);
+                if (emp) {
+                    document.getElementById('employee-modal-title').innerText = 'Edit Karyawan';
+                    document.getElementById('emp-id-input').value = emp.id;
+                    document.getElementById('emp-name-input').value = emp.name;
+                    document.getElementById('emp-role-input').value = emp.role;
+                }
+            } else {
+                document.getElementById('employee-modal-title').innerText = 'Tambah Karyawan';
+                document.getElementById('emp-id-input').value = '';
+                document.getElementById('emp-name-input').value = '';
+                document.getElementById('emp-role-input').value = '';
+            }
+        }
+
+        function closeEmployeeModal() {
+            const modal = document.getElementById('employee-modal');
+            modal.classList.add('opacity-0');
+            modal.children[0].classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        function saveEmployee(e) {
+            e.preventDefault();
+            const id = document.getElementById('emp-id-input').value;
+            const name = document.getElementById('emp-name-input').value;
+            const role = document.getElementById('emp-role-input').value;
+
+            if (id) {
+                const emp = appState.employees.find(x => x.id === id);
+                if (emp) {
+                    emp.name = name;
+                    emp.role = role;
+                }
+            } else {
+                appState.employees.push({
+                    id: 'EMP-' + Date.now(),
+                    name: name,
+                    role: role
+                });
+            }
+
+            saveData();
+            closeEmployeeModal();
+            renderEmployeesTable();
+            Swal.fire('Berhasil', 'Data karyawan disimpan', 'success');
+        }
+
+        function deleteEmployee(id) {
+            Swal.fire({
+                title: 'Hapus Karyawan?',
+                text: "Data yang dihapus tidak bisa dikembalikan!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#94a3b8',
+                confirmButtonText: 'Ya, hapus!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    appState.employees = appState.employees.filter(e => e.id !== id);
+                    saveData();
+                    renderEmployeesTable();
+                    Swal.fire('Terhapus!', 'Karyawan telah dihapus.', 'success');
+                }
+            });
+        }
+
+        function updatePayrollEmployeeDropdown() {
+            const select = document.getElementById('payroll-employee');
+            if(!select) return;
+            select.innerHTML = '<option value="">-- Pilih Karyawan --</option>';
+            appState.employees.forEach(emp => {
+                select.innerHTML += `<option value="${emp.id}">${emp.name} (${emp.role})</option>`;
+            });
+            calculatePayroll();
+        }
+
+        function calculatePayroll() {
+            const empId = document.getElementById('payroll-employee').value;
+            const nameLabel = document.getElementById('payroll-preview-name');
+            
+            if (empId) {
+                const emp = appState.employees.find(e => e.id === empId);
+                nameLabel.innerText = emp ? emp.name : 'Pilih Karyawan';
+            } else {
+                nameLabel.innerText = 'Pilih Karyawan';
+            }
+
+            const totalService = parseFloat(document.getElementById('payroll-total-service').value) || 0;
+            const totalSpotting = parseFloat(document.getElementById('payroll-total-spotting').value) || 0;
+            const deduction = parseFloat(document.getElementById('payroll-deduction').value) || 0;
+
+            const serviceCommission = totalService * 0.375;
+            const spottingCommission = totalSpotting * 2000;
+            const takeHomePay = (serviceCommission + spottingCommission) - deduction;
+
+            document.getElementById('preview-calc-service').innerText = formatRupiah(serviceCommission);
+            document.getElementById('preview-calc-spotting').innerText = formatRupiah(spottingCommission);
+            document.getElementById('preview-calc-deduction').innerText = '- ' + formatRupiah(deduction);
+            document.getElementById('preview-calc-total').innerText = formatRupiah(takeHomePay);
+            
+            if(takeHomePay < 0) {
+                document.getElementById('preview-calc-total').classList.remove('text-emerald-400');
+                document.getElementById('preview-calc-total').classList.add('text-rose-400');
+            } else {
+                document.getElementById('preview-calc-total').classList.remove('text-rose-400');
+                document.getElementById('preview-calc-total').classList.add('text-emerald-400');
+            }
+        }
+
+        function submitPayroll() {
+            const empId = document.getElementById('payroll-employee').value;
+            const emp = appState.employees.find(e => e.id === empId);
+            if (!emp) return Swal.fire('Error', 'Pilih karyawan terlebih dahulu', 'error');
+
+            const dateStart = document.getElementById('payroll-start').value || new Date().toISOString().split('T')[0];
+            const dateEnd = document.getElementById('payroll-end').value || new Date().toISOString().split('T')[0];
+            
+            const totalService = parseFloat(document.getElementById('payroll-total-service').value) || 0;
+            const totalSpotting = parseFloat(document.getElementById('payroll-total-spotting').value) || 0;
+            const deduction = parseFloat(document.getElementById('payroll-deduction').value) || 0;
+
+            const serviceCommission = totalService * 0.375;
+            const spottingCommission = totalSpotting * 2000;
+            const takeHomePay = (serviceCommission + spottingCommission) - deduction;
+
+            if (takeHomePay <= 0 && deduction === 0 && serviceCommission === 0 && spottingCommission === 0) {
+                return Swal.fire('Error', 'Tidak ada gaji yang dihitung (Nominal Rp 0)', 'error');
+            }
+
+            const payrollId = 'PAY-' + Date.now();
+            const record = {
+                id: payrollId,
+                date: new Date().toISOString(),
+                employeeId: emp.id,
+                employeeName: emp.name,
+                periodStart: dateStart,
+                periodEnd: dateEnd,
+                totalService: totalService,
+                totalSpotting: totalSpotting,
+                serviceCommission: serviceCommission,
+                spottingCommission: spottingCommission,
+                deduction: deduction,
+                takeHomePay: takeHomePay
+            };
+
+            appState.payrolls.push(record);
+
+            // Add to Finances as Pengeluaran
+            const financeRecord = {
+                id: 'MJR-' + Date.now() + Math.floor(Math.random()*100),
+                date: new Date().toISOString(),
+                type: 'Pengeluaran',
+                category: 'Gaji Karyawan',
+                amount: takeHomePay,
+                description: `Gaji: ${emp.name} (${dateStart} s/d ${dateEnd})`
+            };
+            appState.finances.push(financeRecord);
+
+            saveData();
+            Swal.fire('Berhasil', 'Gaji berhasil dibayar dan disimpan sebagai Pengeluaran Arus Kas.', 'success');
+
+            // Reset form
+            document.getElementById('payroll-total-service').value = 0;
+            document.getElementById('payroll-total-spotting').value = 0;
+            document.getElementById('payroll-deduction').value = 0;
+            calculatePayroll();
+        }
+
+        function renderPayrollsTable() {
+            const tbody = document.getElementById('payroll-table-body');
+            if(!tbody) return;
+            tbody.innerHTML = '';
+            
+            const sorted = [...appState.payrolls].sort((a,b) => new Date(b.date) - new Date(a.date));
+
+            if (sorted.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-slate-400 italic">Belum ada riwayat pembayaran gaji</td></tr>';
+                return;
+            }
+
+            sorted.forEach(p => {
+                const dateStr = new Date(p.date).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50/50 transition">
+                        <td class="p-4 text-xs font-mono font-bold text-slate-500">${p.id}</td>
+                        <td class="p-4 text-sm font-bold text-navy">${dateStr}</td>
+                        <td class="p-4 text-sm font-bold text-slate-800">${p.employeeName}</td>
+                        <td class="p-4 text-xs text-slate-500">${p.periodStart} s/d ${p.periodEnd}</td>
+                        <td class="p-4 text-right text-sm font-black text-emerald-600">${formatRupiah(p.takeHomePay)}</td>
+                        <td class="p-4 text-center">
+                            <button onclick="printPayrollSlip('${p.id}')" class="text-rose-500 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1 mx-auto">
+                                <i class="fa-solid fa-file-pdf"></i> Cetak
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function printPayrollSlip(id) {
+            const p = appState.payrolls.find(x => x.id === id);
+            if(!p) return;
+            
+            const wrapper = document.createElement('div');
+            wrapper.style.padding = '20px';
+            wrapper.style.fontFamily = 'Inter, sans-serif';
+            wrapper.innerHTML = `
+                <h2 style="text-align:center; font-weight:900; margin-bottom: 5px;">MANJUR LAUNDRY</h2>
+                <p style="text-align:center; font-size:12px; margin-bottom: 20px; color:#64748b;">SLIP GAJI KARYAWAN</p>
+                <hr style="margin-bottom:20px; border:1px solid #e2e8f0;">
+                <table style="width:100%; margin-bottom: 20px; font-size:14px;">
+                    <tr><td style="padding:4px 0; width:120px; color:#475569;">No. Slip</td><td style="font-weight:bold;">: ${p.id}</td></tr>
+                    <tr><td style="padding:4px 0; color:#475569;">Tanggal</td><td style="font-weight:bold;">: ${new Date(p.date).toLocaleDateString('id-ID')}</td></tr>
+                    <tr><td style="padding:4px 0; color:#475569;">Nama Karyawan</td><td style="font-weight:bold;">: ${p.employeeName}</td></tr>
+                    <tr><td style="padding:4px 0; color:#475569;">Periode Kerja</td><td style="font-weight:bold;">: ${p.periodStart} s/d ${p.periodEnd}</td></tr>
+                </table>
+                <h3 style="font-size:14px; margin-bottom:10px; background:#f8fafc; padding:8px; border-radius:4px;">Rincian Pendapatan & Potongan</h3>
+                <table style="width:100%; font-size:14px; margin-bottom:30px;">
+                    <tr><td style="padding:8px 0; border-bottom:1px dashed #cbd5e1;">Komisi Layanan Kilo/Satuan (37.5%)</td><td style="text-align:right; border-bottom:1px dashed #cbd5e1; font-weight:bold;">${formatRupiah(p.serviceCommission)}</td></tr>
+                    <tr><td style="padding:8px 0; border-bottom:1px dashed #cbd5e1;">Komisi Spotting (Rp 2.000/pcs)</td><td style="text-align:right; border-bottom:1px dashed #cbd5e1; font-weight:bold;">${formatRupiah(p.spottingCommission)}</td></tr>
+                    <tr><td style="padding:8px 0; border-bottom:1px dashed #cbd5e1; color:#ef4444;">Potongan / Kasbon</td><td style="text-align:right; border-bottom:1px dashed #cbd5e1; font-weight:bold; color:#ef4444;">- ${formatRupiah(p.deduction)}</td></tr>
+                </table>
+                <div style="background:#1e3a8a; color:white; padding:15px; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-weight:bold; font-size:12px;">TOTAL TAKE HOME PAY</span>
+                    <span style="font-weight:900; font-size:18px;">${formatRupiah(p.takeHomePay)}</span>
+                </div>
+            `;
+            
+            const opt = {
+                margin:       10,
+                filename:     `Slip_Gaji_${p.employeeName.replace(/ /g, '_')}_${p.periodStart}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2 },
+                jsPDF:        { unit: 'mm', format: 'a5', orientation: 'landscape' }
+            };
+            
+            html2pdf().set(opt).from(wrapper).save();
         }
     </script>
 </body>
